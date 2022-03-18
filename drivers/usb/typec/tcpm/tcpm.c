@@ -477,8 +477,7 @@ static const char * const pd_rev[] = {
 	 (cc) == TYPEC_CC_RP_3_0)
 
 #define tcpm_port_is_sink(port) \
-	((tcpm_cc_is_sink((port)->cc1) && !tcpm_cc_is_sink((port)->cc2)) || \
-	 (tcpm_cc_is_sink((port)->cc2) && !tcpm_cc_is_sink((port)->cc1)))
+	((tcpm_cc_is_sink((port)->cc1) || tcpm_cc_is_sink((port)->cc2)))
 
 #define tcpm_cc_is_source(cc) ((cc) == TYPEC_CC_RD)
 #define tcpm_cc_is_audio(cc) ((cc) == TYPEC_CC_RA)
@@ -3797,10 +3796,12 @@ static void run_state_machine(struct tcpm_port *port)
 			tcpm_set_state(port, SRC_UNATTACHED, PD_T_DRP_SRC);
 		break;
 	case SNK_ATTACH_WAIT:
-		if ((port->cc1 == TYPEC_CC_OPEN &&
+		if (((port->cc1 == TYPEC_CC_OPEN &&
 		     port->cc2 != TYPEC_CC_OPEN) ||
 		    (port->cc1 != TYPEC_CC_OPEN &&
-		     port->cc2 == TYPEC_CC_OPEN))
+		     port->cc2 == TYPEC_CC_OPEN)) ||
+		    (tcpm_cc_is_sink(port->cc1) &&
+		     tcpm_cc_is_sink(port->cc2)))
 			tcpm_set_state(port, SNK_DEBOUNCED,
 				       PD_T_CC_DEBOUNCE);
 		else if (tcpm_port_is_disconnected(port))
@@ -4523,10 +4524,12 @@ static void _tcpm_cc_change(struct tcpm_port *port, enum typec_cc_status cc1,
 			tcpm_set_state(port, SNK_ATTACH_WAIT, 0);
 		break;
 	case SNK_ATTACH_WAIT:
-		if ((port->cc1 == TYPEC_CC_OPEN &&
+		if (((port->cc1 == TYPEC_CC_OPEN &&
 		     port->cc2 != TYPEC_CC_OPEN) ||
 		    (port->cc1 != TYPEC_CC_OPEN &&
-		     port->cc2 == TYPEC_CC_OPEN))
+		     port->cc2 == TYPEC_CC_OPEN)) ||
+		    (tcpm_cc_is_sink(port->cc1) &&
+		     tcpm_cc_is_sink(port->cc2)))
 			new_state = SNK_DEBOUNCED;
 		else if (tcpm_port_is_disconnected(port))
 			new_state = SNK_UNATTACHED;
