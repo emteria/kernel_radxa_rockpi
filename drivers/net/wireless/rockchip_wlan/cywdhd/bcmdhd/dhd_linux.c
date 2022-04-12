@@ -10554,7 +10554,7 @@ err_root:
 #endif
 }
 
-#define CONFIG_WIFI_LOAD_DRIVER_WHEN_KERNEL_BOOTUP 1
+// #define CONFIG_WIFI_LOAD_DRIVER_WHEN_KERNEL_BOOTUP 1
 
 extern int get_wifi_chip_type(void);
 extern char WIFI_MODULE_NAME[];
@@ -10595,8 +10595,8 @@ void rockchip_wifi_exit_module_rkwifi(void)
 late_initcall(rockchip_wifi_init_module_rkwifi);
 module_exit(rockchip_wifi_exit_module_rkwifi);
 #else /* CONFIG_WIFI_LOAD_DRIVER_WHEN_KERNEL_BOOTUP */
-EXPORT_SYMBOL(rockchip_wifi_init_module_rkwifi);
-EXPORT_SYMBOL(rockchip_wifi_exit_module_rkwifi);
+module_init(rockchip_wifi_init_module_rkwifi);
+module_exit(rockchip_wifi_exit_module_rkwifi);
 #endif /* CONFIG_WIFI_LOAD_DRIVER_WHEN_KERNEL_BOOTUP */
 
 #else /* CONFIG_PLAT_ROCKCHIP */
