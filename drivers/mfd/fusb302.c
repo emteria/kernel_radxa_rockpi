@@ -221,8 +221,7 @@ static int fusb302_set_pos_power_by_charge_ic(struct fusb30x_chip *chip)
 	max_cur = 0;
 	psy = power_supply_get_by_phandle(chip->dev->of_node, "charge-dev");
 	if (!psy || IS_ERR(psy))
-	
-		goto skip_charge_dev;
+	goto skip_charge_dev;
 
 	psp = POWER_SUPPLY_PROP_CHARGE_CONTROL_LIMIT_MAX;
 	if (power_supply_get_property(psy, psp, &val) == 0)
@@ -232,13 +231,12 @@ static int fusb302_set_pos_power_by_charge_ic(struct fusb30x_chip *chip)
 	if (power_supply_get_property(psy, psp, &val) == 0)
 		max_cur = val.intval / 1000;
 	skip_charge_dev:
-       	       if (of_property_read_bool(chip->dev->of_node,
-                                 "support-pd-voltage-switching")) {
-               	if (!of_property_read_u32(chip->dev->of_node, "max-input-voltage", &temp))
-                       max_vol = temp / 1000;
+	if (of_property_read_bool(chip->dev->of_node,"support-pd-voltage-switching")) {
+		if (!of_property_read_u32(chip->dev->of_node, "max-input-voltage", &temp))
+			max_vol = temp / 1000;
                	if (!of_property_read_u32(chip->dev->of_node, "max-input-current", &temp))
-                       max_cur = temp / 1000;
-               	dev_dbg(chip->dev, "%s: max_vol = %d, max_cur = %d\n", __func__, max_vol, max_cur);
+			 max_cur = temp / 1000;
+		dev_dbg(chip->dev, "%s: max_vol = %d, max_cur = %d\n", __func__, max_vol, max_cur);
        }
 
 	if (max_vol > 0 && max_cur > 0)
