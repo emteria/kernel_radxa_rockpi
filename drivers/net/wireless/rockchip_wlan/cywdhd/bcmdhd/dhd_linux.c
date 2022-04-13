@@ -7894,6 +7894,14 @@ bool dhd_update_fw_nv_path(dhd_info_t *dhdinfo)
 			"\tNVRAM path:    %s\n", fw_path, nv_path));
 		fw = fw_path;
 		nv = nv_path;
+	} else {
+		sprintf(fw_path, "%s%s", DEFAULT_BCMDHD_FW_PATH, FW_CYW43455);
+		sprintf(nv_path, "%s%s", DEFAULT_BCMDHD_NVRAM_PATH, NVRAM_CYW43455);
+		DHD_ERROR(("Adding default CYW43455 firmware and NVRAM path by CIS\n"
+			"\tfirmware path: %s\n"
+			"\tNVRAM path:    %s\n", fw_path, nv_path));
+		fw = fw_path;
+		nv = nv_path;
 	}
 
 	if (fw && fw[0] != '\0') {
