@@ -453,6 +453,18 @@
 	status = "disabled";
 };
 
+&vccio_acodec {
+	regulator-always-on;
+	regulator-boot-on;
+	regulator-min-microvolt = <3000000>;
+	regulator-max-microvolt = <3000000>;
+	regulator-name = "vccio_acodec";
+	regulator-state-mem {
+		regulator-off-in-suspend;
+	};
+};
+
+
 &reserved_memory {
 	ramoops: ramoops@110000 {
 		compatible = "ramoops";
