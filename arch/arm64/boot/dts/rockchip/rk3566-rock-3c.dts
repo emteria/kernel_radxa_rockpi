@@ -15,6 +15,7 @@
 #include <dt-bindings/sensor-dev.h>
 #include "rk3566.dtsi"
 #include "rk3568-android.dtsi"
+#include "rk3568-radxa-3c-rpi-camera-imx219-1.dtsi"
 
 / {
         model = "Radxa ROCK 3 Model C";
@@ -226,22 +227,6 @@
 &dmc {
 	center-supply = <&vdd_logic>;
 	status = "disabled";
-};
-
-&rkcif {
-	status = "okay";
-};
-
-&rkcif_mmu {
-	status = "okay";
-};
-
-&rkisp {
-	status = "okay";
-};
-
-&rkisp_mmu {
-	status = "okay";
 };
 
 &gpu {
