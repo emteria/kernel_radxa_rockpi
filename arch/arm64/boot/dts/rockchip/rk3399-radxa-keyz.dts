@@ -373,7 +373,7 @@
 
 &route_hdmi {
 	status = "okay";
-	connect = <&vopl_out_hdmi>;
+	connect = <&vopb_out_hdmi>;
 };
 
 &dp_in_vopb {
