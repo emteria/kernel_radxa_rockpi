@@ -16,7 +16,7 @@
 #include "rk3566.dtsi"
 #include "rk3568-android.dtsi"
 #include "rk3568-radxa-3c-rpi-camera-imx219-1.dtsi"
-
+#include "rk3566-radxa-3c-5inch-touchscreen.dtsi"
 / {
         model = "Radxa ROCK 3 Model C";
 	compatible = "radxa,rock-3-c", "rockchip,rk3566";
