@@ -849,15 +849,16 @@
 	status = "okay";
 	clock-frequency = <400000>;
 	fusb0: fusb30x@22 {
-		compatible = "fcs,fusb302";
+		compatible = "fairchild,fusb302";
 		reg = <0x22>;
 		pinctrl-names = "default";
 		pinctrl-0 = <&fusb0_int>;
+		support-pd-voltage-switching;
 		max-input-voltage = <12000000>; /* need to be removed when enable charge IC */
-	        max-input-current = <2500000>;
-		// fusb302,role = "ROLE_MODE_DRP";
-		// fusb302,try_role = "ROLE_MODE_DRP";
-		int-n-gpios = <&gpio1 RK_PB2 GPIO_ACTIVE_HIGH>;
+		max-input-current = <3000000>;
+		fusb302,role = "ROLE_MODE_DRP";
+		fusb302,try_role = "ROLE_MODE_DRP";
+		int-n-gpios = <&gpio1 RK_PA2 GPIO_ACTIVE_HIGH>;
 		status = "okay";
 	};
 };
