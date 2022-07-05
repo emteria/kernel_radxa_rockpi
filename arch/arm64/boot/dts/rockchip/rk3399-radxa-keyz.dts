@@ -48,6 +48,7 @@
 #include "rk3399-android.dtsi"
 #include "rk3399-opp.dtsi"
 #include "rk3399-vop-clk-set.dtsi"
+#include "dt-bindings/usb/pd.h"
 
 &firmware_android {
 	status = "disabled";
@@ -848,19 +849,41 @@
 &i2c4 {
 	status = "okay";
 	clock-frequency = <400000>;
-	fusb0: fusb30x@22 {
-		compatible = "fairchild,fusb302";
+
+	fusb0: fusb302@22 {
+		compatible = "fcs,fusb302";
 		reg = <0x22>;
+
+		interrupt-parent = <&gpio1>;
+		interrupts = <2 IRQ_TYPE_LEVEL_LOW>;
 		pinctrl-names = "default";
 		pinctrl-0 = <&fusb0_int>;
-		support-pd-voltage-switching;
-		max-input-voltage = <12000000>; /* need to be removed when enable charge IC */
-		max-input-current = <3000000>;
-		fusb302,role = "ROLE_MODE_DRP";
-		fusb302,try_role = "ROLE_MODE_DRP";
-		int-n-gpios = <&gpio1 RK_PA2 GPIO_ACTIVE_HIGH>;
+
 		status = "okay";
+		usb_con: connector {
+			data-role = "dual";
+			power-role = "sink";
+			try-power-role = "sink";
+
+			source-pdos = <>;
+			sink-pdos = <PDO_FIXED(5000, 3000, PDO_FIXED_USB_COMM)
+						PDO_FIXED(9000, 3000, PDO_FIXED_USB_COMM)
+						PDO_FIXED(12000, 3000, PDO_FIXED_USB_COMM)>;
+			op-sink-microwatt = <20000000>;
+
+			altmodes {
+				#address-cells = <1>;
+				#size-cells = <0>;
+
+				altmode@0 {
+					reg = <0>;
+					svid = <0xff01>;
+					vdo = <0xffffffff>;
+				};
+			};
+		};
 	};
+
 };
 
 &i2c2 {
