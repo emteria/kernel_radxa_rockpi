@@ -431,7 +431,7 @@
 	disable-wp;
 	num-slots = <1>;
 	// sd-uhs-sdr104;
-	vqmmc-supply = <&vcc_sd>;
+	vqmmc-supply = <&vccio_sd>;
 	pinctrl-names = "default";
 	pinctrl-0 = <&sdmmc_clk &sdmmc_cmd &sdmmc_cd &sdmmc_bus4>;
 	card-detect-delay = <800>;
@@ -759,13 +759,13 @@
 				};
 			};
 
-			vcc_sd: LDO_REG9 {
+			vcc_cam: LDO_REG9 {
 				regulator-always-on;
 				regulator-boot-on;
 				regulator-min-microvolt = <3300000>;
 				regulator-max-microvolt = <3300000>;
 
-				regulator-name = "vcc_sd";
+				regulator-name = "vcc_cam";
 				regulator-state-mem {
 					regulator-off-in-suspend;
 				};
@@ -842,6 +842,8 @@
 
 &i2c4 {
 	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&i2c4_xfer>;
 
 	camera0: camera0-module@10 {
 		status = "okay";
@@ -849,9 +851,9 @@
 		reg = <0x10>;
 
 		clocks = <&cru SCLK_CIF_OUT>;
-		clock-names = "clk_cif_out";
+		clock-names = "xvclk";
 		pinctrl-names = "rockchip,camera_default";
-		pwdn-gpios = <&gpio1 13 GPIO_ACTIVE_HIGH>;
+		pwdn-gpios = <&gpio1 RK_PB5 GPIO_ACTIVE_HIGH>;
 		rockchip,camera-module-index = <0>;
 		rockchip,camera-module-facing = "back";
 		rockchip,camera-module-name = "default";
@@ -873,7 +875,8 @@
 		clocks = <&clkin_cam>;
 		clock-names = "xclk";
 		pinctrl-names = "rockchip,camera_default";
-		pwdn-gpios = <&gpio1 13 GPIO_ACTIVE_HIGH>;
+		pinctrl-0 = <&cif_clkout>;
+		pwdn-gpios = <&gpio1 RK_PB5 GPIO_ACTIVE_HIGH>;
 		rockchip,camera-module-index = <0>;
 		rockchip,camera-module-facing = "back";
 		rockchip,camera-module-name = "default";
@@ -894,7 +897,7 @@
 		clocks = <&cru SCLK_CIF_OUT>;
 		clock-names = "xvclk";
 		pinctrl-names = "rockchip,camera_default";
-		pwdn-gpios = <&gpio1 13 GPIO_ACTIVE_HIGH>;
+		pwdn-gpios = <&gpio1 RK_PB5 GPIO_ACTIVE_HIGH>;
 
 		rockchip,camera-module-index = <0>;
 		rockchip,camera-module-facing = "back";
