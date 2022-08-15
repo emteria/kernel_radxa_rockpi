@@ -173,6 +173,7 @@
 		pinctrl-names = "default";
 		pinctrl-0 = <&vcc5v0_otg_en>;
 		regulator-name = "vcc5v0_otg";
+		regulator-always-on;
 	};
 
 	vcc_sys: vcc-sys {
