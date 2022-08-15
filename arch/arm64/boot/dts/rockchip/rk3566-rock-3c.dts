@@ -736,11 +736,11 @@
 };
 
 &u2phy0_otg {
-	vbus-supply = <&vcc5v0_otg>;
 	status = "okay";
 };
 
 &u2phy1_host {
+	vbus-supply = <&vcc5v0_otg>;
 	status = "okay";
 };
 
