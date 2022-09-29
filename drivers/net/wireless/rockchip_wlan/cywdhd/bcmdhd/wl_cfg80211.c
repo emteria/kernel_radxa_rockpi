@@ -39,7 +39,7 @@
 #include <proto/ethernet.h>
 #include <proto/802.11.h>
 #include <linux/if_arp.h>
-#include <linux/uaccess.h>
+#include <asm/uaccess.h>
 
 #include <proto/ethernet.h>
 #include <linux/kernel.h>
@@ -9441,6 +9441,7 @@ exit:
 	if (body)
 		kfree(body);
 #else /* LINUX_VERSION < VERSION(3,2,0) && !WL_CFG80211_STA_EVENT && !WL_COMPAT_WIRELESS */
+	memset(&sinfo, 0, sizeof(struct station_info));
 	sinfo.filled = 0;
 	if (((event == WLC_E_ASSOC_IND) || (event == WLC_E_REASSOC_IND)) &&
 			reason == DOT11_SC_SUCCESS) {

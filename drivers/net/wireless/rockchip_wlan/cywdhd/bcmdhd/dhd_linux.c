@@ -63,7 +63,7 @@
 #include <uapi/linux/sched/types.h>
 #include <linux/sched/signal.h>
 #endif
-#include <linux/uaccess.h>
+#include <asm/uaccess.h>
 #include <asm/unaligned.h>
 
 #include <epivers.h>
@@ -7894,14 +7894,6 @@ bool dhd_update_fw_nv_path(dhd_info_t *dhdinfo)
 			"\tNVRAM path:    %s\n", fw_path, nv_path));
 		fw = fw_path;
 		nv = nv_path;
-	} else {
-		sprintf(fw_path, "%s%s", DEFAULT_BCMDHD_FW_PATH, FW_CYW43455);
-		sprintf(nv_path, "%s%s", DEFAULT_BCMDHD_NVRAM_PATH, NVRAM_CYW43455);
-		DHD_ERROR(("Adding default CYW43455 firmware and NVRAM path by CIS\n"
-			"\tfirmware path: %s\n"
-			"\tNVRAM path:    %s\n", fw_path, nv_path));
-		fw = fw_path;
-		nv = nv_path;
 	}
 
 	if (fw && fw[0] != '\0') {
@@ -10307,7 +10299,7 @@ dhd_module_cleanup(void)
 	dhd_wifi_platform_unregister_drv();
 }
 
-static void __exit
+static void
 dhd_module_exit(void)
 {
 	dhd_buzzz_detach();
@@ -10315,7 +10307,7 @@ dhd_module_exit(void)
 	unregister_reboot_notifier(&dhd_reboot_notifier);
 }
 
-static int __init
+static int
 dhd_module_init(void)
 {
 	int err;
@@ -10561,8 +10553,6 @@ err_root:
 	pr_err("failed to initialize keepalive debugfs\n");
 #endif
 }
-
-// #define CONFIG_WIFI_LOAD_DRIVER_WHEN_KERNEL_BOOTUP 1
 
 extern int get_wifi_chip_type(void);
 extern char WIFI_MODULE_NAME[];
