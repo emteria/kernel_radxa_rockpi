@@ -47,6 +47,6 @@
 #define EPI_VERSION_DEV		1.363.125
 
 /* Driver Version String, ASCII, 32 chars max */
-#define	EPI_VERSION_STR		"1.363.125.19 (r)"
+#define	EPI_VERSION_STR		"1.363.125.19-20211226 (r)"
 
 #endif /* _epivers_h_ */
