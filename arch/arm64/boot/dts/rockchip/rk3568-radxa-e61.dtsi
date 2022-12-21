@@ -699,12 +699,9 @@
 	vccio7-supply = <&vcc_3v3>;
 };
 
-&pwm4 {
+&pwm8 {
 	status = "okay";
-};
-
-&pwm5 {
-	status = "okay";
+	pinctrl-0 = <&pwm8m0_pins>;
 };
 
 &uart1 {
