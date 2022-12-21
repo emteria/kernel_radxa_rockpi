@@ -813,7 +813,6 @@
 };
 
 &u2phy0_host {
-	vbus-supply = <&pcie30_3v3>;
 	status = "okay";
 };
 
@@ -823,12 +822,11 @@
 };
 // host3
 &u2phy1_host {
-	vbus-supply = <&pcie30_3v3>;
 	status = "okay";
 };
 // host2
 &u2phy1_otg {
-	vbus-supply = <&vcc5v0_usb>;
+	phy-supply = <&vcc5v0_usb>;
 	status = "okay";
 };
 
