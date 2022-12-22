@@ -704,12 +704,6 @@
 	pinctrl-0 = <&pwm8m0_pins>;
 };
 
-&uart1 {
-	status = "okay";
-	pinctrl-names = "default";
-	pinctrl-0 = <&uart1m0_xfer &uart1m0_ctsn>;
-};
-
 &rk_rga {
 	status = "okay";
 };
