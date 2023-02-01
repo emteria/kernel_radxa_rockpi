@@ -1,0 +1,9 @@
+/dts-v1/;
+
+#include "rk3399-rockpi-4b.dts"
+
+/ {
+    chosen {
+        bootargs = "earlycon=uart8250,mmio32,0xff1a0000 swiotlb=1 drm.edid_firmware=akupara/lontium-edid.bin video=HDMI-A-1:1280x800@60 video=DSI-1:d tmpsrx=kernel console=ttyFIQ0 androidboot.baseband=N/A androidboot.veritymode=enforcing androidboot.hardware=rk30board androidboot.console=ttyFIQ0 init=/init initrd=0x62000001,0x00800000 coherent_pool=1m";
+    };
+};
