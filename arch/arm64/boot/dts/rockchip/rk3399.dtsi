@@ -470,6 +470,7 @@
 			resets = <&cru SRST_A_USB3_OTG0>;
 			reset-names = "usb3-otg";
 			snps,dis_enblslpm_quirk;
+			snps,dis-u1u2-quirk;
 			snps,dis-u2-freeclk-exists-quirk;
 			snps,dis_u2_susphy_quirk;
 			snps,dis-del-phy-power-chg-quirk;
@@ -1487,6 +1488,14 @@
 		};
 		wafer_info: wafer-info@1c {
 			reg = <0x1c 0x1>;
+		};
+		cpu_performance: cpu-performance@1e {
+			reg = <0x1e 0x1>;
+			bits = <3 3>;
+		};
+		gpu_performance: gpu-performance@1e {
+			reg = <0x1e 0x1>;
+			bits = <6 2>;
 		};
 		customer_demand: customer-demand@22 {
 			reg = <0x22 0x1>;
@@ -2750,7 +2759,7 @@
 			};
 		};
 
-		sleep {
+		suspend {
 			ap_pwroff: ap-pwroff {
 				rockchip,pins = <1 RK_PA5 1 &pcfg_pull_none>;
 			};

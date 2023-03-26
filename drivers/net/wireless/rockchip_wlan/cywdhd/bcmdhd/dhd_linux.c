@@ -7894,6 +7894,14 @@ bool dhd_update_fw_nv_path(dhd_info_t *dhdinfo)
 			"\tNVRAM path:    %s\n", fw_path, nv_path));
 		fw = fw_path;
 		nv = nv_path;
+	} else {
+		sprintf(fw_path, "%s%s", DEFAULT_BCMDHD_FW_PATH, FW_CYW43455);
+		sprintf(nv_path, "%s%s", DEFAULT_BCMDHD_NVRAM_PATH, NVRAM_CYW43455);
+		DHD_ERROR(("Adding default CYW43455 firmware and NVRAM path by CIS\n"
+			"\tfirmware path: %s\n"
+			"\tNVRAM path:    %s\n", fw_path, nv_path));
+		fw = fw_path;
+		nv = nv_path;
 	}
 
 	if (fw && fw[0] != '\0') {
@@ -10554,7 +10562,7 @@ err_root:
 #endif
 }
 
-#define CONFIG_WIFI_LOAD_DRIVER_WHEN_KERNEL_BOOTUP 1
+// #define CONFIG_WIFI_LOAD_DRIVER_WHEN_KERNEL_BOOTUP 1
 
 extern int get_wifi_chip_type(void);
 extern char WIFI_MODULE_NAME[];
@@ -10595,8 +10603,8 @@ void rockchip_wifi_exit_module_rkwifi(void)
 late_initcall(rockchip_wifi_init_module_rkwifi);
 module_exit(rockchip_wifi_exit_module_rkwifi);
 #else /* CONFIG_WIFI_LOAD_DRIVER_WHEN_KERNEL_BOOTUP */
-EXPORT_SYMBOL(rockchip_wifi_init_module_rkwifi);
-EXPORT_SYMBOL(rockchip_wifi_exit_module_rkwifi);
+module_init(rockchip_wifi_init_module_rkwifi);
+module_exit(rockchip_wifi_exit_module_rkwifi);
 #endif /* CONFIG_WIFI_LOAD_DRIVER_WHEN_KERNEL_BOOTUP */
 
 #else /* CONFIG_PLAT_ROCKCHIP */

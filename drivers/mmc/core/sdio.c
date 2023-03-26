@@ -649,6 +649,8 @@ try_again:
 	if (host->ops->init_card)
 		host->ops->init_card(host, card);
 
+	card->ocr = ocr_card;
+
 	/*
 	 * If the host and card support UHS-I mode request the card
 	 * to switch to 1.8V signaling level.  No 1.8v signalling if
@@ -765,7 +767,7 @@ try_again:
 
 		card = oldcard;
 	}
-	card->ocr = ocr_card;
+
 	mmc_fixup_device(card, sdio_fixup_methods);
 
 	if (card->type == MMC_TYPE_SD_COMBO) {
@@ -1116,7 +1118,7 @@ static const struct mmc_bus_ops mmc_sdio_ops = {
 	.sw_reset = mmc_sdio_sw_reset,
 };
 
-
+int cis_chipvendor = 0;	//add by May
 /*
  * Starting point for SDIO card init.
  */
@@ -1125,6 +1127,7 @@ int mmc_attach_sdio(struct mmc_host *host)
 	int err, i, funcs;
 	u32 ocr, rocr;
 	struct mmc_card *card;
+	struct sdio_func_tuple *tpl;  //add by May
 
 	WARN_ON(!host->claimed);
 
@@ -1234,6 +1237,15 @@ int mmc_attach_sdio(struct mmc_host *host)
 		if (err)
 			goto remove_added;
 	}
+	//==========================add by May==============================//	
+	for (tpl = host->card->tuples; tpl; tpl = tpl->next) {
+		if (tpl->code == 0x81 && tpl->size == 0x01 && tpl->data[0] == 0x01) {	
+			pr_err("%s: found AzureWave Module", __func__);
+			cis_chipvendor = 0x8101;
+			break;
+		}
+	}
+	//==========================================================================//
 
 	if (host->caps & MMC_CAP_POWER_OFF_CARD)
 		pm_runtime_put(&card->dev);
