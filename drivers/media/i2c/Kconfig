@@ -1926,6 +1926,17 @@ config VIDEO_SC2355
 	  To compile this driver as a module, choose M here: the
 	  module will be called sc2355.
 
+config VIDEO_SC3336
+	tristate "SmartSens SC3336 sensor support"
+	depends on I2C && VIDEO_V4L2 && VIDEO_V4L2_SUBDEV_API
+	depends on MEDIA_CAMERA_SUPPORT
+	select V4L2_FWNODE
+	help
+	  Support for the SmartSens SC3336 sensor.
+
+	  To compile this driver as a module, choose M here: the
+	  module will be called sc3336.
+
 config VIDEO_SC401AI
 	tristate "SmartSens SC401AI sensor support"
 	depends on I2C && VIDEO_V4L2 && VIDEO_V4L2_SUBDEV_API
@@ -1958,6 +1969,16 @@ config VIDEO_SC430CS
 
 	  To compile this driver as a module, choose M here: the
 	  module will be called SC430CS.
+
+config VIDEO_SC4336
+	tristate "SmartSens SC4336 sensor support"
+	depends on I2C && VIDEO_V4L2
+	select MEDIA_CONTROLLER
+	select VIDEO_V4L2_SUBDEV_API
+	select V4L2_FWNODE
+	help
+	  This is a Video4Linux2 sensor driver for the SmartSens
+	  SC4336 camera.
 
 config VIDEO_SC500AI
 	tristate "SmartSens SC500AI sensor support"

@@ -23,6 +23,8 @@
 #define VOP_MAJOR(version)		((version) >> 8)
 #define VOP_MINOR(version)		((version) & 0xff)
 
+#define VOP_VERSION_RK3568	VOP_VERSION(0x40, 0x15)
+
 #define ROCKCHIP_OUTPUT_DUAL_CHANNEL_LEFT_RIGHT_MODE	BIT(0)
 #define ROCKCHIP_OUTPUT_DUAL_CHANNEL_ODD_EVEN_MODE	BIT(1)
 #define ROCKCHIP_OUTPUT_DATA_SWAP			BIT(2)
@@ -477,6 +479,11 @@ struct vop2_cluster_regs {
 	struct vop_reg enable;
 	struct vop_reg afbc_enable;
 	struct vop_reg lb_mode;
+
+	struct vop_reg src_color_ctrl;
+	struct vop_reg dst_color_ctrl;
+	struct vop_reg src_alpha_ctrl;
+	struct vop_reg dst_alpha_ctrl;
 };
 
 struct vop2_scl_regs {
@@ -620,6 +627,11 @@ struct vop2_video_port_regs {
 	struct vop_reg cubic_lut_en;
 	struct vop_reg cubic_lut_update_en;
 	struct vop_reg cubic_lut_mst;
+
+	struct vop_reg edpi_wms_hold_en;
+	struct vop_reg edpi_te_en;
+	struct vop_reg edpi_wms_fs;
+	struct vop_reg gamma_update_en;
 };
 
 struct vop2_wb_regs {
@@ -687,6 +699,7 @@ struct vop2_wb_data {
 	const uint32_t *formats;
 	struct vop_rect max_output;
 	const struct vop2_wb_regs *regs;
+	uint32_t fifo_depth;
 };
 
 struct vop2_video_port_data {
@@ -824,6 +837,7 @@ struct vop2_ctrl {
 	struct vop_reg cluster0_dst_color_ctrl;
 	struct vop_reg cluster0_src_alpha_ctrl;
 	struct vop_reg cluster0_dst_alpha_ctrl;
+
 	struct vop_reg src_color_ctrl;
 	struct vop_reg dst_color_ctrl;
 	struct vop_reg src_alpha_ctrl;
