@@ -217,6 +217,11 @@ static const struct drm_display_mode dw_hdmi_default_modes[] = {
 		   2492, 2640, 0, 1080, 1084, 1089, 1125, 0,
 		   DRM_MODE_FLAG_PHSYNC | DRM_MODE_FLAG_PVSYNC),
 	  .vrefresh = 50, .picture_aspect_ratio = HDMI_PICTURE_ASPECT_16_9, },
+	/* 28 - 1280x800@60Hz 16:9 */
+	{ DRM_MODE("1280x800", DRM_MODE_TYPE_DRIVER, 74250, 1280, 1352,
+		   1480, 1680, 0, 800, 803, 809, 831, 0,
+		   DRM_MODE_FLAG_NHSYNC | DRM_MODE_FLAG_PVSYNC),
+	  .vrefresh = 60, .picture_aspect_ratio = HDMI_PICTURE_ASPECT_16_9, },
 	/* 19 - 1280x720@50Hz 16:9 */
 	{ DRM_MODE("1280x720", DRM_MODE_TYPE_DRIVER, 74250, 1280, 1720,
 		   1760, 1980, 0, 720, 725, 730, 750, 0,

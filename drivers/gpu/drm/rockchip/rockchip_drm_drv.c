@@ -166,10 +166,10 @@ static const struct drm_display_mode rockchip_drm_default_modes[] = {
 		   1430, 1650, 0, 720, 725, 730, 750, 0,
 		   DRM_MODE_FLAG_PHSYNC | DRM_MODE_FLAG_PVSYNC),
 	  .vrefresh = 60, .picture_aspect_ratio = HDMI_PICTURE_ASPECT_16_9, },
-	/* 27 - 1280x800@60Hz 16:9 */
-	{ DRM_MODE("1280x800", DRM_MODE_TYPE_DRIVER, 71000, 1280, 1328,
-		   1360, 1440, 0, 800, 803, 809, 823, 0,
-		   DRM_MODE_FLAG_NHSYNC | DRM_MODE_FLAG_NVSYNC),
+	/* 28 - 1280x800@60Hz 16:9 */
+	{ DRM_MODE("1280x800", DRM_MODE_TYPE_DRIVER, 74250, 1280, 1352,
+		   1480, 1680, 0, 800, 803, 809, 831, 0,
+		   DRM_MODE_FLAG_NHSYNC | DRM_MODE_FLAG_PVSYNC),
 	  .vrefresh = 60, .picture_aspect_ratio = HDMI_PICTURE_ASPECT_16_9, },
 	/* 16 - 1920x1080@60Hz 16:9 */
 	{ DRM_MODE("1920x1080", DRM_MODE_TYPE_DRIVER, 148500, 1920, 2008,

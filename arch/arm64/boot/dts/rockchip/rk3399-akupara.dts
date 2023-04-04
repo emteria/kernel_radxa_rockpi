@@ -7,3 +7,16 @@
         bootargs = "earlycon=uart8250,mmio32,0xff1a0000 video=HDMI-A-1:1280x800@60 video=DSI-1:d console=ttyFIQ0 androidboot.baseband=N/A androidboot.veritymode=enforcing androidboot.hardware=rk30board androidboot.console=ttyFIQ0 init=/init initrd=0x62000001,0x00800000 coherent_pool=1m";
     };
 };
+
+&display_subsystem {
+    status = "okay";
+    route {
+        route_hdmi: route-hdmi {
+            status = "okay";
+            force-output;
+            video,clock = <74250>;
+            video,hdisplay = <1280>;
+            video,vdisplay = <800>;
+        };
+    };
+};
