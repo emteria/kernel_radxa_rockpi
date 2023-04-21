@@ -4,7 +4,7 @@
 
 / {
     chosen {
-        bootargs = "earlycon=uart8250,mmio32,0xff1a0000 drm.edid_firmware=edid/1280x800.bin video=HDMI-A-1:1280x800@60 video=DSI-1:d console=ttyFIQ0 androidboot.baseband=N/A androidboot.veritymode=enforcing androidboot.hardware=rk30board androidboot.console=ttyFIQ0 init=/init initrd=0x62000001,0x00800000 coherent_pool=1m";
+        bootargs = "earlycon=uart8250,mmio32,0xff1a0000 video=HDMI-A-1:1280x800@60 video=DSI-1:d console=ttyFIQ0 androidboot.baseband=N/A androidboot.veritymode=enforcing androidboot.hardware=rk30board androidboot.console=ttyFIQ0 init=/init initrd=0x62000001,0x00800000 coherent_pool=1m";
     };
 };
 
