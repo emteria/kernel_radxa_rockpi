@@ -71,6 +71,7 @@
 &i2c2 {
 	status = "okay";
 	pinctrl-0 = <&i2c2m1_xfer>;
+<<<<<<< HEAD
 	// #address-cells = <1>;
 	// #size-cells = <0>;
 
@@ -80,11 +81,23 @@
 	// 	status = "okay";
 	// };
 /*
+=======
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	chipone_icn8952: chipone_icn8952@30 {
+		compatible = "chipone_icn8505";
+		reg = <0x30>;
+		status = "okay";
+	};
+
+>>>>>>> 5da9ac8205e7 (dts: cm3io: add raspberrypi 7inch touchscreen support)
     rockpi_ft5406: rockpi_ft5406@38 {
 		compatible = "rockpi_ft5406";
 		reg = <0x38>;
 		status = "okay";
 	};
+<<<<<<< HEAD
 */
     focaltech: focaltech@38 {
                status = "okay";
@@ -99,6 +112,8 @@
                focaltech,display-coords =  <0 0 800 480>;
                focaltech,max-touch-number = <5>;
      };
+=======
+>>>>>>> 5da9ac8205e7 (dts: cm3io: add raspberrypi 7inch touchscreen support)
 
 	rockpi_mcu: rockpi-mcu@45 {
 		compatible = "rockpi_mcu";
@@ -106,4 +121,7 @@
 		status = "okay";
 	};
 };
+<<<<<<< HEAD
 
+=======
+>>>>>>> 5da9ac8205e7 (dts: cm3io: add raspberrypi 7inch touchscreen support)
