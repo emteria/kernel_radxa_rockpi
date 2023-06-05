@@ -93,7 +93,7 @@
 
 >>>>>>> 5da9ac8205e7 (dts: cm3io: add raspberrypi 7inch touchscreen support)
     rockpi_ft5406: rockpi_ft5406@38 {
-		compatible = "rockpi_ft5406";
+		compatible = "fts_ts";
 		reg = <0x38>;
 		status = "okay";
 	};
