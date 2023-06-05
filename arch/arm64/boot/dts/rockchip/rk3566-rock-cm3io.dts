@@ -95,16 +95,16 @@
 		};
 	};
 
-	vcc_tp: vcc-tp-regulator {
-		compatible = "regulator-fixed";
-		enable-active-high;
-		gpio = <&gpio2 RK_PC6 GPIO_ACTIVE_HIGH>;
-		pinctrl-names = "default";
-		pinctrl-0 = <&vcc_tp_en>;
-		regulator-name = "vcc_tp";
-		regulator-always-on;
-		regulator-boot-on;
-	};
+	// vcc_tp: vcc-tp-regulator {
+	// 	compatible = "regulator-fixed";
+	// 	enable-active-high;
+	// 	gpio = <&gpio2 RK_PC6 GPIO_ACTIVE_HIGH>;
+	// 	pinctrl-names = "default";
+	// 	pinctrl-0 = <&vcc_tp_en>;
+	// 	regulator-name = "vcc_tp";
+	// 	regulator-always-on;
+	// 	regulator-boot-on;
+	// };
 
 	// backlight: backlight {
 	// 	status = "okay";
@@ -670,9 +670,9 @@
 	// 	};
 	// };
 
-	vcc-tp {
-		vcc_tp_en: vcc-tp-en {
-			rockchip,pins = <2 RK_PC6 RK_FUNC_GPIO &pcfg_pull_up>;
-		};
-	};
+	// vcc-tp {
+	// 	vcc_tp_en: vcc-tp-en {
+	// 		rockchip,pins = <2 RK_PC6 RK_FUNC_GPIO &pcfg_pull_up>;
+	// 	};
+	// };
 };

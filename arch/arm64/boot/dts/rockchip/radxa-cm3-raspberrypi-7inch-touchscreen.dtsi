@@ -7,19 +7,6 @@
 
 / {
 	compatible = "radxa,rock-cm3", "rockchip,rk3566";
-
-	vcc_mipi: vcc-mipi {
-		status = "okay";
-		compatible = "regulator-fixed";
-		regulator-name = "vcc_mipi";
-		regulator-boot-on;
-		regulator-min-microvolt = <3300000>;
-		regulator-max-microvolt = <3300000>;
-		enable-active-high;
-		regulator-always-on;
-		gpio = <&gpio0 RK_PC7 GPIO_ACTIVE_HIGH>;
-	};
-
 };
 
 &video_phy1 {
@@ -94,7 +81,7 @@
 	};
 
     rockpi_ft5406: rockpi_ft5406@38 {
-		compatible = "rockpi_ft5406";
+		compatible = "fts_ts";
 		reg = <0x38>;
 		status = "okay";
 	};
