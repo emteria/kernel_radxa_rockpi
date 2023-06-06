@@ -247,7 +247,7 @@ static int rockpi_ft5406_probe(struct i2c_client *client,
 		LOG_ERR("failed to allocate input device\n");
 		goto input_allocate_failed;
 	}
-	input_dev->name = "fts_ts";
+	input_dev->name = "rockpi_ft5406";
 	input_dev->id.bustype = BUS_I2C;
 	input_dev->dev.parent = &ts_data->client->dev;
 
