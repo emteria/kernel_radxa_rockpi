@@ -7,17 +7,6 @@
 
 / {
 	compatible = "radxa,rock-cm3", "rockchip,rk3566";
-
-	vcc_tp: vcc-tp-regulator {
-		compatible = "regulator-fixed";
-		enable-active-high;
-		gpio = <&gpio4 RK_PA1 GPIO_ACTIVE_HIGH>;
-		pinctrl-names = "default";
-		pinctrl-0 = <&vcc_tp_en>;
-		regulator-name = "vcc_tp";
-		regulator-always-on;
-		regulator-boot-on;
-	};
 };
 
 &video_phy1 {
@@ -102,13 +91,4 @@
 		reg = <0x45>;
 		status = "okay";
 	};
-};
-
-&pinctrl {
-	vcc_tp {
-		vcc_tp_en: vcc-mipi-en {
-			rockchip,pins = <4 RK_PA1 RK_FUNC_GPIO &pcfg_output_high>;
-		};
-	};
-
 };
