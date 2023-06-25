@@ -79,12 +79,26 @@
 	// 	reg = <0x30>;
 	// 	status = "okay";
 	// };
-
+/*
     rockpi_ft5406: rockpi_ft5406@38 {
 		compatible = "rockpi_ft5406";
 		reg = <0x38>;
 		status = "okay";
 	};
+*/
+    focaltech: focaltech@38 {
+               status = "okay";
+               compatible = "focaltech,fts";
+               reg = <0x38>;
+             //  focaltech,irq-gpio = <&gpio0 RK_PB3 IRQ_TYPE_EDGE_FALLING>;
+             //  focaltech,reset-gpio = <&gpio0 RK_PB4 GPIO_ACTIVE_LOW>;
+               irq_mode = <0>; //0 poll ,1 irq
+               x_reverse = <1>;
+               y_reverse = <1>;
+               xy_swap = <0>;
+               focaltech,display-coords =  <0 0 800 480>;
+               focaltech,max-touch-number = <5>;
+     };
 
 	rockpi_mcu: rockpi-mcu@45 {
 		compatible = "rockpi_mcu";
@@ -92,3 +106,4 @@
 		status = "okay";
 	};
 };
+

@@ -147,6 +147,7 @@ struct fts_ts_data {
     struct work_struct fwupg_work;
     struct delayed_work esdcheck_work;
     struct delayed_work prc_work;
+    struct delayed_work event_work;
     struct work_struct resume_work;
     struct regulator *vdd;
     struct regulator *vcc_i2c;
