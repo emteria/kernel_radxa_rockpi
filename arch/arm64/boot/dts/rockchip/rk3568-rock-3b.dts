@@ -11,6 +11,12 @@
 / {
 	model = "Rockchip ROCK 3 Model B";
 	compatible = "radxa,rock-3-b", "rockchip,rk3568";
+	fan0: pwm-fan {
+		compatible = "pwm-fan";
+		#cooling-cells = <2>;
+		cooling-levels = <0 64 128 192 255>;
+		pwms = <&pwm8 0 10000 0>;
+	};
 
 	audiopwmout_diff: audiopwmout-diff {
 		status = "disabled";
@@ -80,43 +86,6 @@
         };
 	};
 
-	// edp_panel: edp-panel {
-	// 	compatible = "simple-panel";
-	// 	backlight = <&backlight>;
-	// 	power-supply = <&vcc3v3_lcd_edp>;
-	// 	enable-gpios = <&gpio0 RK_PC4 GPIO_ACTIVE_HIGH>;    //BL_EN
-	// 	pinctrl-names = "default";
-	// 	prepare-delay-ms = <100>;
-	// 	enable-delay-ms = <100>;
-	// 	//reset-delay-ms = <100>;
-	// 	bpc = <8>;
-	// 	//bus-format = ;
-	// 	display-timings {
-	// 		native-mode = <&timing0>;
-	// 		timing0: timing0 {
-	// 			clock-frequency = <241500000>;  //241.5M
-	// 			hactive = <2560>;
-	// 			vactive = <1440>;
-	// 			hfront-porch = <80>; 
-	// 			hsync-len = <32>;
-	// 			hback-porch = <48>;
-	// 			vfront-porch = <31>; 
-	// 			vsync-len = <5>;
-	// 			vback-porch = <3>;
-	// 			hsync-active = <0>;
-	// 			vsync-active = <0>;
-	// 			de-active = <0>;
-	// 			pixelclk-active = <0>;
-    // 		};
-   	// 	 };
-
-	// 	ports {
-	// 		panel_in_edp: endpoint {
-	// 				remote-endpoint = <&edp_out_panel>;
-	// 		};
-	// 	};
-	// };
-
 	hdmi_sound: hdmi-sound {
 		compatible = "simple-audio-card";
 		simple-audio-card,format = "i2s";
@@ -167,7 +136,7 @@
 
 	rk_headset: rk-headset {
 		compatible = "rockchip_headset";
-		headset_gpio = <&gpio3 RK_PC1 GPIO_ACTIVE_HIGH>;
+		headset_gpio = <&gpio3 RK_PA1 GPIO_ACTIVE_HIGH>;
 		pinctrl-names = "default";
 		pinctrl-0 = <&hp_det>;
 		io-channels = <&saradc 2>;    //HP_HOOK引脚
@@ -221,25 +190,25 @@
 		regulator-name = "vcc5v0_otg";
 	};
 
-	pcie30_avdd0v9: pcie30-avdd0v9 {
-		compatible = "regulator-fixed";
-		regulator-name = "pcie30_avdd0v9";
-		regulator-always-on;
-		regulator-boot-on;
-		regulator-min-microvolt = <900000>;
-		regulator-max-microvolt = <900000>;
-		vin-supply = <&vcc3v3_sys>;
-	};
+	// pcie30_avdd0v9: pcie30-avdd0v9 {
+	// 	compatible = "regulator-fixed";
+	// 	regulator-name = "pcie30_avdd0v9";
+	// 	regulator-always-on;
+	// 	regulator-boot-on;
+	// 	regulator-min-microvolt = <900000>;
+	// 	regulator-max-microvolt = <900000>;
+	// 	vin-supply = <&vcc3v3_sys>;
+	// };
 
-	pcie30_avdd1v8: pcie30-avdd1v8 {
-		compatible = "regulator-fixed";
-		regulator-name = "pcie30_avdd1v8";
-		regulator-always-on;
-		regulator-boot-on;
-		regulator-min-microvolt = <1800000>;
-		regulator-max-microvolt = <1800000>;
-		vin-supply = <&vcc3v3_sys>;
-	};
+	// pcie30_avdd1v8: pcie30-avdd1v8 {
+	// 	compatible = "regulator-fixed";
+	// 	regulator-name = "pcie30_avdd1v8";
+	// 	regulator-always-on;
+	// 	regulator-boot-on;
+	// 	regulator-min-microvolt = <1800000>;
+	// 	regulator-max-microvolt = <1800000>;
+	// 	vin-supply = <&vcc3v3_sys>;
+	// };
 
 	pcie30_3v3: gpio-regulator {
 		compatible = "regulator-gpio";
@@ -300,7 +269,7 @@
 		status = "okay";
 
 		user-led {
-			gpios = <&gpio0 RK_PB7 GPIO_ACTIVE_LOW>;
+			gpios = <&gpio0 RK_PB7 GPIO_ACTIVE_HIGH>;
 			linux,default-trigger = "heartbeat";
 			default-state = "on";
 			pinctrl-0 = <&user_led>;
@@ -309,6 +278,33 @@
 
 	test-power {
 		status = "okay";
+	};
+
+	em05_modem_power: em05-modem-power-regulator {
+		compatible = "regulator-fixed";
+		regulator-name = "em05_modem_power";
+		enable-active-high;
+		gpio = <&gpio0 RK_PC6 GPIO_ACTIVE_HIGH>;
+		regulator-boot-on;
+		regulator-always-on;
+	};
+
+	em05_modem_reset: em05-modem-reset-regulator {
+		compatible = "regulator-fixed";
+		regulator-name = "em05_modem_reset";
+		enable-active-high;
+		gpio = <&gpio0 RK_PD6 GPIO_ACTIVE_HIGH>;
+		regulator-boot-on;
+		regulator-always-on;
+	};
+
+	em05_modem_airplane: em05-modem-airplane-regulator {
+		compatible = "regulator-fixed";
+		regulator-name = "em05_modem_airplane";
+		enable-active-high;
+		gpio = <&gpio1 RK_PB0 GPIO_ACTIVE_HIGH>;
+		regulator-boot-on;
+		regulator-always-on;
 	};
 };
 
@@ -743,6 +739,19 @@
 &i2c5 {
 	status = "okay";	
 	pinctrl-0 = <&i2c5m0_xfer>;
+
+		hym8563: hym8563@51 {
+		compatible = "haoyu,hym8563";
+		status = "okay";
+		reg = <0x51>;
+		#clock-cells = <0>;
+		clock-frequency = <32768>;
+		clock-output-names = "hym8563";
+		pinctrl-names = "default";
+		pinctrl-0 = <&hym8563_int>;
+		interrupt-parent = <&gpio0>;
+		interrupts = <27 IRQ_TYPE_LEVEL_LOW>;
+	};
 };
 
 //bt
@@ -977,6 +986,11 @@
 	status = "okay";
 };
 
+&pcie2x1 {
+	reset-gpios = <&gpio3 RK_PC1 GPIO_ACTIVE_HIGH>;
+	vpcie3v3-supply = <&vcc3v3_sys>;
+	status = "okay";
+};
 
 &sata0 {
 	status = "disabled";
@@ -987,7 +1001,7 @@
 };
 
 &sata2 {
-	status = "okay";
+	status = "disabled";
 };
 
 &xpcs {
@@ -1021,41 +1035,6 @@
 	status = "okay";
 };
 
-// &edp {
-// 	force-hpd;
-// 	status = "okay";
-
-// 	ports {
-// 		edp_out: port@1 {
-// 			reg = <1>;
-// 			#address-cells = <1>;
-// 			#size-cells = <0>;
-
-// 			edp_out_panel: endpoint@0 {
-// 				reg = <0>;
-// 				remote-endpoint = <&panel_in_edp>;
-// 			};
-// 		};
-// 	};
-// };
-
-// &edp_phy {
-// 	status = "okay";
-// };
-
-// &edp_in_vp0 {
-// 	status = "okay";
-// };
-
-// &edp_in_vp1 {
-// 	status = "disabled";
-// };
-
-// &route_edp {
-// 	status = "okay";
-// 	connect = <&vp0_out_edp>;
-// };
-
 &gmac0 {
 	phy-mode = "rgmii";
 	clock_in_out = "output";
@@ -1076,8 +1055,8 @@
 		     &gmac0_rgmii_clk
 		     &gmac0_rgmii_bus>;
 
-	tx_delay = <0x3c>;
-	rx_delay = <0x2f>;
+	tx_delay = <0x36>;
+	rx_delay = <0x2d>;
 
 	phy-handle = <&rgmii_phy0>;
 	status = "okay";
@@ -1104,8 +1083,8 @@
 		     &gmac1m1_rgmii_clk
 		     &gmac1m1_rgmii_bus>;
 
-	tx_delay = <0x4f>;
-	rx_delay = <0x26>;
+	tx_delay = <0x47>;
+	rx_delay = <0x28>;
 
 	phy-handle = <&rgmii_phy1>;
 	status = "okay";
@@ -1153,6 +1132,14 @@
 		size = <0x0 0x08000000>;
 		alignment = <0x0 0x1000>;
 	};
+};
+
+&rng {
+	status = "okay";
+};
+
+&rockchip_suspend {
+	status = "okay";
 };
 
 &can1 {
@@ -1216,13 +1203,30 @@
 
 	headphone {
 		hp_det: hp-det {
-			rockchip,pins = <3 RK_PC1 RK_FUNC_GPIO &pcfg_pull_up>;
+			rockchip,pins = <3 RK_PA1 RK_FUNC_GPIO &pcfg_pull_up>;
+		};
+	};
+
+	hym8563 {
+		hym8563_int: hym8563-int {
+			rockchip,pins =
+				<0 RK_PD3 0 &pcfg_pull_up>;
 		};
 	};
 
 	leds {
 		user_led: user-led {
 			rockchip,pins = <0 RK_PB7 RK_FUNC_GPIO &pcfg_pull_none>;
+		};
+	};
+
+	modem {
+		lte_power_en: lte-power-en {
+			rockchip,pins = <1 RK_PB0 RK_FUNC_GPIO &pcfg_pull_none>;
+		};
+
+		lte_reset: lte-reset {
+			rockchip,pins = <0 RK_PD6 RK_FUNC_GPIO &pcfg_pull_none>;
 		};
 	};
 };
