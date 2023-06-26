@@ -60,6 +60,7 @@ static int x_reverse = 0;
 static int y_reverse = 1;
 
 
+static int ic_ready = 0;
 static int irq_mode = 1;
 /*****************************************************************************
 * Global variable or extern global variabls/functions
@@ -929,11 +930,25 @@ static irqreturn_t fts_ts_interrupt(int irq, void *data)
 static void event_work_func(struct work_struct *work)
 {
     int ret = 0;
+    u8 chip_id[2] = { 0 };
+    struct i2c_client *client;
     struct fts_ts_data *ts_data = container_of(work,struct fts_ts_data, event_work.work);
 
     if (!ts_data) {
         FTS_ERROR("[INTR]: Invalid fts_ts_data");
         return;
+    }
+
+    if (0 == ic_ready) {
+        client = ts_data->client;
+        ret = fts_i2c_read_reg(client, FTS_REG_CHIP_ID, &chip_id[0]);
+        FTS_INFO("chip id :0x%02x ", chip_id[0]);
+        if (ret < 0){
+              queue_delayed_work(ts_data->ts_workqueue, &ts_data->event_work, msecs_to_jiffies(1000));
+              return;
+        } else {
+            ic_ready = 1;
+        }
     }
 
 
@@ -1482,12 +1497,13 @@ static int fts_ts_probe(struct i2c_client *client, const struct i2c_device_id *i
     fts_reset_proc(200);
 #endif
 
+/*
     ret = fts_get_ic_information(ts_data);
     if (ret) {
         FTS_ERROR("not focal IC, unregister driver");
         goto err_irq_req;
     }
-
+*/
 #if FTS_APK_NODE_EN
     ret = fts_create_apk_debug_channel(ts_data);
     if (ret) {
@@ -1850,7 +1866,7 @@ static void __exit fts_ts_exit(void)
     i2c_del_driver(&fts_ts_driver);
 }
 
-module_init(fts_ts_init);
+late_initcall_sync(fts_ts_init);
 module_exit(fts_ts_exit);
 
 MODULE_AUTHOR("FocalTech Driver Team");
