@@ -106,6 +106,9 @@ static unsigned int at24_write_timeout = 25;
 module_param_named(write_timeout, at24_write_timeout, uint, 0);
 MODULE_PARM_DESC(at24_write_timeout, "Time (in ms) to try writes (default 25)");
 
+
+static struct at24_data *global_at24;
+
 struct at24_chip_data {
 	/*
 	 * these fields mirror their equivalents in
@@ -301,7 +304,6 @@ static ssize_t at24_regmap_read(struct at24_data *at24, char *buf,
 		 * to avoid a premature timeout in case of high CPU load.
 		 */
 		read_time = jiffies;
-
 		ret = regmap_bulk_read(regmap, offset, buf, count);
 		dev_dbg(&client->dev, "read %zu@%d --> %d (%ld)\n",
 			count, offset, ret, jiffies);
@@ -374,12 +376,14 @@ static ssize_t at24_regmap_write(struct at24_data *at24, const char *buf,
 	return -ETIMEDOUT;
 }
 
+
 static int at24_read(void *priv, unsigned int off, void *val, size_t count)
 {
 	struct at24_data *at24;
 	struct device *dev;
 	char *buf = val;
 	int ret;
+
 
 	at24 = priv;
 	dev = at24_base_client_dev(at24);
@@ -469,6 +473,14 @@ static int at24_write(void *priv, unsigned int off, void *val, size_t count)
 	pm_runtime_put(dev);
 
 	return 0;
+}
+
+int at24_custom_read(unsigned int off, void *val, size_t count){
+	int ret = at24_read(global_at24,off,val,count);
+	if (0 == ret )
+		return count;
+	else
+		return -1;
 }
 
 static void at24_properties_to_pdata(struct device *dev,
@@ -749,6 +761,7 @@ static int at24_probe(struct i2c_client *client)
 	if (pdata.setup)
 		pdata.setup(at24->nvmem, pdata.context);
 
+	global_at24 = at24;
 	return 0;
 
 err_clients:
