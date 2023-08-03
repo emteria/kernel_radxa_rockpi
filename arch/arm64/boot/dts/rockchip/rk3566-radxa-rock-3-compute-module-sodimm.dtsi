@@ -24,6 +24,7 @@
 		#size-cells = <2>;
 		ranges;
 
+        /*
 		rknpu_reserved: rknpu {
 			compatible = "shared-dma-pool";
 			inactive;
@@ -31,6 +32,7 @@
 			size = <0x0 0x08000000>;
 			alignment = <0x0 0x1000>;
 		};
+        */
 	};
 
 	rk817_sound: rk817-sound {
@@ -545,7 +547,7 @@
 };
 
 &rknpu {
-	memory-region = <&rknpu_reserved>;
+//	memory-region = <&rknpu_reserved>;
 	rknpu-supply = <&vdd_gpu>;
 	status = "okay";
 };
