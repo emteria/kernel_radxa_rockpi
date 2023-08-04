@@ -938,9 +938,7 @@
 };
 
 &pcie2x1 {
-	// reset-gpios = <&gpio3 RK_PC1 GPIO_ACTIVE_HIGH>;
-	pinctrl-names = "default";
-	pinctrl-0 = <&pcie20m1_pins>;
+	reset-gpios = <&gpio3 RK_PC1 GPIO_ACTIVE_HIGH>;
 	vpcie3v3-supply = <&vcc3v3_sys2>;
 	status = "okay";
 };
