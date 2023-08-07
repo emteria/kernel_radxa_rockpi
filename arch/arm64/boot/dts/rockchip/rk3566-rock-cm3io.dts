@@ -10,7 +10,8 @@
 #include "rk3566-rock-compute-module-3.dtsi"
 #include <dt-bindings/display/drm_mipi_dsi.h>
 #include <dt-bindings/display/media-bus-format.h>
-#include "radxa-cm3-raspberrypi-7inch-touchscreen.dtsi"
+//#include "radxa-cm3-raspberrypi-7inch-touchscreen.dtsi"
+#include "rk3566-rock-cm3io_219.dtsi"
 
 / {
 	model = "Radxa ROCK CM3 IO";
