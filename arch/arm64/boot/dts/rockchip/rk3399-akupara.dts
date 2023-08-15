@@ -17,6 +17,8 @@
             video,clock = <74250>;
             video,hdisplay = <1280>;
             video,vdisplay = <800>;
+            logo,uboot = "logo_black.bmp";
+            logo,kernel = "logo_black.bmp";
         };
     };
 };
