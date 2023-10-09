@@ -8,7 +8,7 @@
 /dts-v1/;
 
 #include "rk3588s-radxa-nx5.dtsi"
-// #include "rk3588s-radxa-nx5-rpi-camera-imx219-1.dtsi"
+//#include "rk3588s-radxa-nx5-rpi-camera-imx415.dtsi"
 // #include "rk3588-radxa-nx5-imx464_2.dtsi"
 
 / {
@@ -121,7 +121,7 @@
         pinctrl-names = "default", "rts_gpio";
         pinctrl-0 = <&uart1m1_rtsn>, <&bt_wake_gpio>, <&bt_irq_gpio>;
         pinctrl-1 = <&uart1_gpios>;
-        BT,wake_gpio     = <&gpio1 RK_PB0 GPIO_ACTIVE_HIGH>;
+        BT,wake_gpio     = <&gpio1 RK_PB0 GPIO_ACTIVE_LOW>;
         BT,wake_host_irq = <&gpio1 RK_PA4 GPIO_ACTIVE_HIGH>;
         status = "okay";
 	};
@@ -350,11 +350,11 @@
         };
 
         bt_wake_gpio: bt-wake-gpio {
-            rockchip,pins = <1 RK_PB0 RK_FUNC_GPIO &pcfg_pull_none>;
+            rockchip,pins = <1 RK_PB0 RK_FUNC_GPIO &pcfg_pull_down>;
         };
 
         bt_irq_gpio: bt-irq-gpio {
-            rockchip,pins = <0 RK_PA4 RK_FUNC_GPIO &pcfg_pull_down>;
+            rockchip,pins = <1 RK_PA4 RK_FUNC_GPIO &pcfg_pull_none>;
         };
 	};
 };
