@@ -201,6 +201,7 @@ struct imx415 {
 	struct clk		*xvclk;
 	struct gpio_desc	*reset_gpio;
 	struct gpio_desc	*power_gpio;
+	struct gpio_desc	*pwdn_gpio;
 	struct regulator_bulk_data supplies[IMX415_NUM_SUPPLIES];
 
 	struct pinctrl		*pinctrl;
@@ -2072,6 +2073,10 @@ int __imx415_power_on(struct imx415 *imx415)
 	if (!IS_ERR(imx415->reset_gpio))
 		gpiod_direction_output(imx415->reset_gpio, 0);
 
+	usleep_range(500, 1000);
+	if (!IS_ERR(imx415->pwdn_gpio))
+		gpiod_set_value_cansleep(imx415->pwdn_gpio, 0);
+
 	/* At least 1us between XCLR and clk */
 	/* fix power on timing if insmod this ko */
 	usleep_range(10 * 1000, 20 * 1000);
@@ -2117,8 +2122,12 @@ static void __imx415_power_off(struct imx415 *imx415)
 		}
 	}
 
+	if (!IS_ERR(imx415->pwdn_gpio))
+		gpiod_set_value_cansleep(imx415->pwdn_gpio, 1);
+
 	if (!IS_ERR(imx415->reset_gpio))
 		gpiod_direction_output(imx415->reset_gpio, 1);
+
 	clk_disable_unprepare(imx415->xvclk);
 	if (!IS_ERR_OR_NULL(imx415->pins_sleep)) {
 		ret = pinctrl_select_state(imx415->pinctrl,
@@ -2561,12 +2570,18 @@ static int imx415_probe(struct i2c_client *client,
 		return -EINVAL;
 	}
 
-	imx415->reset_gpio = devm_gpiod_get(dev, "reset", GPIOD_ASIS);
+	imx415->reset_gpio = devm_gpiod_get(dev, "reset", GPIOD_OUT_LOW);
 	if (IS_ERR(imx415->reset_gpio))
 		dev_warn(dev, "Failed to get reset-gpios\n");
+
 	imx415->power_gpio = devm_gpiod_get(dev, "power", GPIOD_ASIS);
 	if (IS_ERR(imx415->power_gpio))
 		dev_warn(dev, "Failed to get power-gpios\n");
+
+	imx415->pwdn_gpio = devm_gpiod_get(dev, "pwdn", GPIOD_OUT_LOW);
+	if (IS_ERR(imx415->pwdn_gpio))
+		dev_warn(dev, "Failed to get pwdn-gpios\n");
+
 	imx415->pinctrl = devm_pinctrl_get(dev);
 	if (!IS_ERR(imx415->pinctrl)) {
 		imx415->pins_default =

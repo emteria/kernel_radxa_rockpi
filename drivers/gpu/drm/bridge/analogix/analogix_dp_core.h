@@ -184,6 +184,7 @@ struct analogix_dp_device {
 	int			dpms_mode;
 	struct gpio_desc	*hpd_gpiod;
 	bool                    force_hpd;
+	bool                    disable_audio;
 	bool			fast_train_enable;
 	bool			psr_supported;
 	struct work_struct	modeset_retry_work;

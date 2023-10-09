@@ -187,6 +187,7 @@ static int fts_get_ic_information(struct fts_ts_data *ts_data)
         ret1 = fts_i2c_read_reg(client, FTS_REG_CHIP_ID2, &chip_id[1]);
         if ((ret < 0) || (ret1 < 0) || (0x0 == chip_id[0]) || (0x0 == chip_id[1])) {
             FTS_DEBUG("i2c read invalid, read:0x%02x%02x", chip_id[0], chip_id[1]);
+            return ret;
         } else {
             ret = fts_get_chip_types(ts_data, chip_id[0], chip_id[1], VALID);
 			if (!ret)

@@ -1393,7 +1393,8 @@ analogix_dp_detect(struct analogix_dp_device *dp)
 
 	ret = analogix_dp_phy_power_on(dp);
 	if (ret) {
-		extcon_set_state_sync(dp->extcon, EXTCON_DISP_DP, false);
+		if(!dp->disable_audio)
+			extcon_set_state_sync(dp->extcon, EXTCON_DISP_DP, false);
 		return connector_status_disconnected;
 	}
 
@@ -1426,11 +1427,12 @@ analogix_dp_detect(struct analogix_dp_device *dp)
 out:
 	analogix_dp_phy_power_off(dp);
 
-	if (status == connector_status_connected)
-		extcon_set_state_sync(dp->extcon, EXTCON_DISP_DP, true);
-	else
-		extcon_set_state_sync(dp->extcon, EXTCON_DISP_DP, false);
-
+	if(!dp->disable_audio){
+		if (status == connector_status_connected)
+			extcon_set_state_sync(dp->extcon, EXTCON_DISP_DP, true);
+		else
+			extcon_set_state_sync(dp->extcon, EXTCON_DISP_DP, false);
+	}
 	return status;
 }
 
@@ -1449,10 +1451,12 @@ static void analogix_dp_connector_force(struct drm_connector *connector)
 {
 	struct analogix_dp_device *dp = to_dp(connector);
 
-	if (connector->status == connector_status_connected)
-		extcon_set_state_sync(dp->extcon, EXTCON_DISP_DP, true);
-	else
-		extcon_set_state_sync(dp->extcon, EXTCON_DISP_DP, false);
+	if(!dp->disable_audio){
+		if (connector->status == connector_status_connected)
+			extcon_set_state_sync(dp->extcon, EXTCON_DISP_DP, true);
+		else
+			extcon_set_state_sync(dp->extcon, EXTCON_DISP_DP, false);
+	}
 }
 
 static const struct drm_connector_funcs analogix_dp_connector_funcs = {
@@ -2213,6 +2217,8 @@ analogix_dp_probe(struct device *dev, struct analogix_dp_plat_data *plat_data)
 		return ERR_CAST(dp->reg_base);
 
 	dp->force_hpd = of_property_read_bool(dev->of_node, "force-hpd");
+
+	dp->disable_audio = of_property_read_bool(dev->of_node, "disable-audio");
 
 	/* Try two different names */
 	dp->hpd_gpiod = devm_gpiod_get_optional(dev, "hpd", GPIOD_IN);

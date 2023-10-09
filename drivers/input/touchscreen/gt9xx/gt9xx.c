@@ -2870,6 +2870,7 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
 
 probe_init_error:
     printk("   <%s>_%d  prob error !!!!!!!!!!!!!!!\n", __func__, __LINE__);    
+	regulator_disable(ts->tp_regulator);
     GTP_GPIO_FREE(ts->rst_pin);
     GTP_GPIO_FREE(ts->irq_pin);
 probe_init_error_requireio:

@@ -1,0 +1,20 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright (c) 2021 Rockchip Electronics Co., Ltd.
+ *
+ */
+
+/dts-v1/;
+
+#include "rk3588-radxa-ps009-v10.dtsi"
+//#include "rk3588-radxa-ps009-display-v10.dtsi"
+//#include "rk3588-radxa-ps009-display-v10_hdmi1_dp0_dp1.dtsi"
+#include "rk3588-radxa-ps009-display-v10_hdmi1_8k_dp1.dtsi"
+//#include "rk3588-radxa-ps009-display-v10_edp_hdmi1_dsi0_dsi1.dtsi"
+#include "rk3588-radxa-ps009-camera-v10.dtsi"
+#include "rk3588-android.dtsi"
+
+/ {
+	model = "Radxa ps009";
+	compatible = "radxa,ps009", "rockchip,rk3588-evb1-lp4-v10", "rockchip,rk3588";
+};
