@@ -1,0 +1,16 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright (c) 2021 Rockchip Electronics Co., Ltd.
+ *
+ */
+
+/dts-v1/;
+
+#include "rk3588-radxa-ps008-v10.dtsi"
+#include "rk3588-radxa-ps008-display.dtsi"
+#include "rk3588-android.dtsi"
+
+/ {
+	model = "Radxa PS008";
+	compatible = "radxa,ps008", "rockchip,rk3588-evb1-lp4-v10", "rockchip,rk3588";
+};

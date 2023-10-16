@@ -1,0 +1,78 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright (c) 2022 Radxa Limited.
+ *
+ */
+
+&dp0 {
+	status = "okay";
+};
+
+&dp0_in_vp2 {
+	status = "okay";
+};
+
+&usbdp_phy0 {
+	status = "okay";
+};
+
+&usbdp_phy0_dp {
+	status = "okay";
+};
+
+&dp1 {
+	status = "disabled";
+};
+
+&dp1_in_vp2 {
+	status = "disabled";
+};
+
+&hdmi0 {
+	enable-gpios = <&gpio4 RK_PB1 GPIO_ACTIVE_HIGH>;
+	status = "okay";
+};
+
+&hdmi0_in_vp0 {
+	status = "okay";
+};
+
+&hdmi1 {
+	enable-gpios = <&gpio4 RK_PA1 GPIO_ACTIVE_HIGH>;
+	status = "okay";
+};
+
+&hdmi1_in_vp1 {
+	status = "okay";
+};
+
+&hdptxphy_hdmi0 {
+	status = "okay";
+};
+
+&hdptxphy_hdmi1 {
+	status = "okay";
+};
+
+&route_hdmi0 {
+	status = "okay";
+	connect = <&vp0_out_hdmi0>;
+};
+
+&route_hdmi1 {
+	status = "okay";
+	connect = <&vp1_out_hdmi1>;
+};
+
+&route_dp0 {
+	status = "okay";
+	connect = <&vp2_out_dp0>;
+};
+
+&route_dp1 {
+	status = "disabled";
+	connect = <&vp2_out_dp0>;
+};
+
+
+
