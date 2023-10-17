@@ -5968,7 +5968,7 @@ static void tcpm_init(struct tcpm_port *port)
 	 * Should possibly wait for VBUS to settle if it was enabled locally
 	 * since tcpm_reset_port() will disable VBUS.
 	 */
-	port->vbus_present = true;
+	port->vbus_present = port->tcpc->get_vbus(port->tcpc);
 	if (port->vbus_present)
 		port->vbus_never_low = true;
 
