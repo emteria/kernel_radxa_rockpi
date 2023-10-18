@@ -9,8 +9,8 @@
 #include "rk3588-radxa-ps009-v10.dtsi"
 //#include "rk3588-radxa-ps009-display-v10.dtsi"
 //#include "rk3588-radxa-ps009-display-v10_hdmi1_dp0_dp1.dtsi"
-#include "rk3588-radxa-ps009-display-v10_hdmi1_8k_dp1.dtsi"
-//#include "rk3588-radxa-ps009-display-v10_edp_hdmi1_dsi0_dsi1.dtsi"
+//#include "rk3588-radxa-ps009-display-v10_hdmi1_8k_dp1.dtsi"
+#include "rk3588-radxa-ps009-display-v10_edp_hdmi1_dsi0_dsi1.dtsi"
 #include "rk3588-radxa-ps009-camera-v10.dtsi"
 #include "rk3588-android.dtsi"
 
