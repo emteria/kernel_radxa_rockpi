@@ -14,6 +14,7 @@
 #include <linux/i2c.h>
 #include <linux/bcd.h>
 #include <linux/rtc.h>
+#include <linux/delay.h>
 
 #define HYM8563_CTL1		0x00
 #define HYM8563_CTL1_TEST	BIT(7)
@@ -473,9 +474,15 @@ out:
 static int hym8563_init_device(struct i2c_client *client)
 {
 	int ret;
+	int retry = 10;
 
 	/* Clear stop flag if present */
-	ret = i2c_smbus_write_byte_data(client, HYM8563_CTL1, 0);
+	for(;retry > 0;retry--){
+		ret = i2c_smbus_write_byte_data(client, HYM8563_CTL1, 0);
+		if(ret >= 0)
+			break;
+		msleep(10);
+	}
 	if (ret < 0)
 		return ret;
 
