@@ -202,10 +202,15 @@
 	status = "okay";
 };
 
-&hdmi1_in_vp1 {
+&hdmi1_in_vp0 {
 	status = "okay";
 };
 
+
+&vop {
+	assigned-clocks = <&cru ACLK_VOP>;
+	assigned-clock-rates = <800000000>;
+};
 
 /**********************************dp*********************************************/
 
@@ -231,7 +236,7 @@
 	status = "okay";
 };
 
-&dp1_in_vp0 {
+&dp1_in_vp2 {
 	status = "okay";
 };
 
@@ -428,7 +433,7 @@
 	logo,kernel = "logo_kernel.bmp";
 	logo,mode = "center";
 	charge_logo,mode = "center";
-	connect = <&vp1_out_hdmi1>;
+	connect = <&vp0_out_hdmi1>;
 };
 
 &route_dp0 {
@@ -446,7 +451,7 @@
 	logo,kernel = "logo_kernel.bmp";
 	logo,mode = "center";
 	charge_logo,mode = "center";
-	connect = <&vp0_out_dp1>;
+	connect = <&vp2_out_dp1>;
 };
 
 &route_edp0 {
