@@ -271,14 +271,14 @@
 		vin-supply = <&vcc_3v3_s0>;
 	};
 
-	pcie30_avdd0v75: pcie30-avdd0v75 {
+	pcie30_vdd0v75: pcie30-avdd0v75 {
 		compatible = "regulator-fixed";
-		regulator-name = "pcie30_avdd0v75";
+		regulator-name = "pcie30_vdd0v75";
 		regulator-boot-on;
 		regulator-always-on;
 		regulator-min-microvolt = <750000>;
 		regulator-max-microvolt = <750000>;
-		vin-supply = <&avdd_0v75_s0>;
+		vin-supply = <&vdd_0v75_s0>;
 	};
 
 	pcie30_avdd1v8: pcie30-avdd1v8 {
@@ -433,6 +433,9 @@
         status = "okay";
 	};
 
+	test-power {
+		status = "okay";
+	};
 };
 
 &av1d_mmu {
@@ -720,11 +723,11 @@
 };
 
 &usbhost3_0 {
-	status = "okay";
+	status = "disabled";
 };
 
 &usbhost_dwc3_0 {
-	status = "okay";
+	status = "disabled";
 };
 
 &vdpu {
@@ -1068,7 +1071,7 @@
 
 	wireless-bluetooth {
         uart6_gpios: uart6-gpios {
-            rockchip,pins = <0 RK_PA2 RK_FUNC_GPIO &pcfg_pull_none>;
+            rockchip,pins = <1 RK_PA2 RK_FUNC_GPIO &pcfg_pull_none>;
         };
 
         bt_reset_gpio: bt-reset-gpio {
