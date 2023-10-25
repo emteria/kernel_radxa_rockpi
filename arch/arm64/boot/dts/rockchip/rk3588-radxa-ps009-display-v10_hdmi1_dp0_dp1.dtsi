@@ -189,7 +189,7 @@
 	status = "disabled";
 };
 
-&hdmi0_in_vp0 {
+&hdmi0_in_vp2 {
 	status = "disabled";
 };
 
@@ -268,7 +268,7 @@
 };
 
 &hdptxphy0 {
-	status = "okay";
+	status = "disabled";
 };
 	
 &hdptxphy_hdmi0 {
@@ -276,7 +276,7 @@
 };
 
 &edp0_in_vp2 {
-	status = "okay";
+	status = "disabled";
 };
 
 &vcc3v3_lcd_n {
@@ -409,18 +409,7 @@
 
 /******************************************************************************/
 
-/*
-&vp0 {
-	assigned-clocks = <&cru DCLK_VOP0>;
-	assigned-clock-parents = <&hdptxphy_hdmi_clk0>;
-};
 
-&vp1 {
-	assigned-clocks = <&cru DCLK_VOP1>;
-	assigned-clock-parents = <&hdptxphy_hdmi_clk1>;
-};
-
-*/
 
 /******************************************************************************/
 &display_subsystem {
