@@ -194,6 +194,9 @@
 };
 
 &hdmi1 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&hdmim1_tx1_m0_cec &hdmim0_tx1_hpd &hdmim1_tx1_scl &hdmim1_tx1_sda>;
+	cec-enable = <1>;
 	enable-gpios = <&gpio4 RK_PB1 GPIO_ACTIVE_HIGH>;
 	status = "okay";
 };
@@ -486,5 +489,12 @@
 				<2 RK_PC1 RK_FUNC_GPIO &pcfg_pull_up>;
 		};
 
+	};
+
+	hdmim1-cec {
+		hdmim1_tx1_m0_cec: hdmim1-tx1-m0-cec {
+			rockchip,pins =
+				<2 RK_PC4 4 &pcfg_pull_none>;
+		};
 	};
 };
