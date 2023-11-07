@@ -803,6 +803,18 @@
 	};
 };
 
+&i2c1 {
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&i2c1m2_xfer>;
+	eeprom@50 {
+		status = "okay";
+		compatible = "atmel,24c16";
+		reg = <0x50>;
+	};
+};
+
+
 &i2s5_8ch {
 	status = "okay";
 };
