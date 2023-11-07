@@ -42,7 +42,7 @@
 	status = "okay";
 };
 
-&hdmi1_in_vp1 {
+&hdmi1_in_vp0 {
 	status = "okay";
 };
 
@@ -61,7 +61,7 @@
 
 &route_hdmi1 {
 	status = "okay";
-	connect = <&vp1_out_hdmi1>;
+	connect = <&vp0_out_hdmi1>;
 };
 
 &route_dp0 {

@@ -73,6 +73,7 @@
 
 	leds: leds {
 		compatible = "gpio-leds";
+		status = "disabled";
 		work_led: work {
 			gpios = <&gpio0 RK_PB7 GPIO_ACTIVE_HIGH>;
 			linux,default-trigger = "heartbeat";
@@ -385,6 +386,18 @@
 		regulator-boot-on;
 		regulator-always-on;
 	};
+
+	pwmleds {
+		compatible = "pwm-leds";
+
+		power_key_backlight: power-key-backlight {
+			status = "okay";
+			label = "power_key_backlight";
+			pwms = <&pwm8 0 1000000 0>;
+			max-brightness = <1023>;
+		};
+};
+
 };
 
 &av1d_mmu {
@@ -929,7 +942,7 @@
 
 	wireless-bluetooth {
         uart6_gpios: uart6-gpios {
-            rockchip,pins = <0 RK_PA2 RK_FUNC_GPIO &pcfg_pull_none>;
+            rockchip,pins = <1 RK_PA2 RK_FUNC_GPIO &pcfg_pull_none>;
         };
 
         bt_reset_gpio: bt-reset-gpio {
@@ -980,6 +993,12 @@
 &pwm2 {
 	pinctrl-names = "active";
 	pinctrl-0 = <&pwm2m2_pins>;
+	status = "okay";
+};
+
+&pwm8 {
+	pinctrl-names = "active";
+	pinctrl-0 = <&pwm8m0_pins>;
 	status = "okay";
 };
 
