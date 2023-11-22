@@ -248,6 +248,7 @@ struct rk3x_i2c {
 	struct notifier_block i2c_restart_nb;
 	bool system_restarting;
 	struct rk_tb_client tb_cl;
+	int irq;
 };
 
 static void rk3x_i2c_prepare_read(struct rk3x_i2c *i2c);
@@ -304,6 +305,13 @@ static bool rk3x_i2c_auto_stop(struct rk3x_i2c *i2c)
 	len = i2c->msg->len - i2c->processed;
 
 	if (len > 32)
+		goto out;
+
+	/* For tx mode, one byte of the device address also needs to be counted,
+	 * if the data length is equal to 32, which is actually 33 bytes, it would
+	 * need to be divided into two parts, and needs to jump out of autostop.
+	 */
+	if (i2c->msg->len == 32 && i2c->mode == REG_CON_MOD_TX && !i2c->processed)
 		goto out;
 
 	i2c->state = STATE_STOP;
@@ -1468,9 +1476,28 @@ MODULE_DEVICE_TABLE(of, rk3x_i2c_match);
 
 static void rk3x_i2c_tb_cb(void *data)
 {
-	unsigned int irq = (unsigned long)data;
+	unsigned long clk_rate;
+	int ret;
+	struct rk3x_i2c *i2c = (struct rk3x_i2c *)data;
 
-	enable_irq(irq);
+	if (i2c->clk) {
+		i2c->clk_rate_nb.notifier_call = rk3x_i2c_clk_notifier_cb;
+		ret = clk_notifier_register(i2c->clk, &i2c->clk_rate_nb);
+		if (ret != 0) {
+			dev_err(i2c->dev, "Unable to register clock notifier\n");
+			clk_unprepare(i2c->pclk);
+			clk_unprepare(i2c->clk);
+			return;
+		}
+	}
+
+	clk_rate = clk_get_rate(i2c->clk);
+	if (!clk_rate)
+		device_property_read_u32(i2c->dev, "i2c,clk-rate", (u32 *)&clk_rate);
+
+	rk3x_i2c_adapt_div(i2c, clk_rate);
+
+	enable_irq(i2c->irq);
 }
 
 static int rk3x_i2c_probe(struct platform_device *pdev)
@@ -1563,10 +1590,11 @@ static int rk3x_i2c_probe(struct platform_device *pdev)
 	irq = platform_get_irq(pdev, 0);
 	if (irq < 0)
 		return irq;
+	i2c->irq = irq;
 
 	if (IS_ENABLED(CONFIG_ROCKCHIP_THUNDER_BOOT_SERVICE) &&
 	    device_property_read_bool(&pdev->dev, "rockchip,amp-shared")) {
-		i2c->tb_cl.data = (void *)(unsigned long)irq;
+		i2c->tb_cl.data = i2c;
 		i2c->tb_cl.cb = rk3x_i2c_tb_cb;
 		irq_set_status_flags(irq, IRQ_NOAUTOEN);
 	}
@@ -1577,9 +1605,6 @@ static int rk3x_i2c_probe(struct platform_device *pdev)
 		dev_err(&pdev->dev, "cannot request IRQ\n");
 		return ret;
 	}
-
-	if (IS_ENABLED(CONFIG_ROCKCHIP_THUNDER_BOOT_SERVICE) && i2c->tb_cl.cb)
-		rk_tb_client_register_cb(&i2c->tb_cl);
 
 	platform_set_drvdata(pdev, i2c);
 
@@ -1613,20 +1638,24 @@ static int rk3x_i2c_probe(struct platform_device *pdev)
 		goto err_clk;
 	}
 
-	if (i2c->clk) {
-		i2c->clk_rate_nb.notifier_call = rk3x_i2c_clk_notifier_cb;
-		ret = clk_notifier_register(i2c->clk, &i2c->clk_rate_nb);
-		if (ret != 0) {
-			dev_err(&pdev->dev, "Unable to register clock notifier\n");
-			goto err_pclk;
+	if (IS_ENABLED(CONFIG_ROCKCHIP_THUNDER_BOOT_SERVICE) && i2c->tb_cl.cb) {
+		rk_tb_client_register_cb(&i2c->tb_cl);
+	} else {
+		if (i2c->clk) {
+			i2c->clk_rate_nb.notifier_call = rk3x_i2c_clk_notifier_cb;
+			ret = clk_notifier_register(i2c->clk, &i2c->clk_rate_nb);
+			if (ret != 0) {
+				dev_err(&pdev->dev, "Unable to register clock notifier\n");
+				goto err_pclk;
+			}
 		}
+
+		clk_rate = clk_get_rate(i2c->clk);
+		if (!clk_rate)
+			device_property_read_u32(&pdev->dev, "i2c,clk-rate", (u32 *)&clk_rate);
+
+		rk3x_i2c_adapt_div(i2c, clk_rate);
 	}
-
-	clk_rate = clk_get_rate(i2c->clk);
-	if (!clk_rate)
-		device_property_read_u32(&pdev->dev, "i2c,clk-rate", (u32 *)&clk_rate);
-
-	rk3x_i2c_adapt_div(i2c, clk_rate);
 
 	if (rk3x_i2c_get_version(i2c) >= RK_I2C_VERSION5)
 		i2c->autostop_supported = true;
