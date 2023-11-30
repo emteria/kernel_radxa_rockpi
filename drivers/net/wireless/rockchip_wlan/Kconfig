@@ -55,3 +55,5 @@ source "drivers/net/wireless/rockchip_wlan/mvl88w8977/Kconfig"
 source "drivers/net/wireless/rockchip_wlan/cywdhd/Kconfig"
 
 endif # WL_ROCKCHIP
+
+source "drivers/net/wireless/rockchip_wlan/aic8800/Kconfig"
