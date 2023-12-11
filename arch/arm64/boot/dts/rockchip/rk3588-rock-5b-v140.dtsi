@@ -717,7 +717,7 @@
 };
 
 &hdmi1 {
-	enable-gpios = <&gpio4 RK_PB2 GPIO_ACTIVE_HIGH>;
+	enable-gpios = <&gpio4 RK_PA1 GPIO_ACTIVE_HIGH>;
 	status = "okay";
 };
 
