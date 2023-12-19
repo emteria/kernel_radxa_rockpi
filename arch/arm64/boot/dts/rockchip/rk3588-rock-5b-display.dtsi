@@ -73,9 +73,11 @@
 &dsi1 {
 	status = "okay";
 	rockchip,lane-rate = <480>;
+	// rockchip,lane-rate = <1000>;
 
 	dsi1_panel: panel@0 {
 		status = "okay";
+		//compatible ="radxa,display-10hd-N40A";
 		compatible ="chongzhou,cz101b4001";
 		reg = <0>;
 		backlight = <&dsi1_backlight>;
@@ -135,19 +137,19 @@
 	pinctrl-0 = <&i2c6m0_xfer>;
 	clock-frequency = <400000>;
 
-	gt9xx: gt9xx@14 {
-		status = "disabled";
-		compatible = "goodix,gt9xx";
-		reg = <0x14>;
-		pinctrl-names = "default";
-		pinctrl-0 = <&gt9xx_gpio>;
-		touch-gpio = <&gpio0 RK_PD3 IRQ_TYPE_LEVEL_HIGH>;
-		reset-gpio = <&gpio0 RK_PC6 GPIO_ACTIVE_HIGH>;
-		max-x = <800>;
-		max-y = <1280>;
-		tp-size = <9112>;
-		tp-supply = <&vcc_lcd_mipi1>;
-	};
+	// gt9xx: gt9xx@14 {
+	// 	status = "okay";
+	// 	compatible = "goodix,gt9xx";
+	// 	reg = <0x14>;
+	// 	pinctrl-names = "default";
+	// 	pinctrl-0 = <&gt9xx_gpio>;
+	// 	touch-gpio = <&gpio0 RK_PD3 IRQ_TYPE_LEVEL_HIGH>;
+	// 	reset-gpio = <&gpio0 RK_PC6 GPIO_ACTIVE_HIGH>;
+	// 	max-x = <800>;
+	// 	max-y = <1280>;
+	// 	tp-size = <9112>;
+	// 	tp-supply = <&vcc_lcd_mipi1>;
+	// };
 
 	focaltech: focaltech@38 {
 		status = "okay";
