@@ -10,6 +10,7 @@
 #include "rk3588s-radxa-nx5.dtsi"
 //#include "rk3588s-radxa-nx5-rpi-camera-imx415.dtsi"
 // #include "rk3588-radxa-nx5-imx464_2.dtsi"
+#include "rk3588s-radxa-nx5-imx219.dtsi"
 
 / {
 	model = "Radxa NX5 IO";
