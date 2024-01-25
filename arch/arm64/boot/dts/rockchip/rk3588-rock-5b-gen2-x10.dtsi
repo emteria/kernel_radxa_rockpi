@@ -324,10 +324,10 @@
 		regulator-min-microvolt = <5000000>;
 		regulator-max-microvolt = <5000000>;
 		enable-active-high;
-		gpio = <&gpio4 RK_PB0 GPIO_ACTIVE_HIGH>;
+		//gpio = <&gpio4 RK_PB0 GPIO_ACTIVE_HIGH>;
 		vin-supply = <&vcc5v0_usb>;
-		pinctrl-names = "default";
-		pinctrl-0 = <&vcc5v0_host_en>;
+		//pinctrl-names = "default";
+		//pinctrl-0 = <&vcc5v0_host_en>;
 	};
 
 	// vcc5v0_otg: vcc5v0-otg {
@@ -918,14 +918,21 @@
 };
 
 &pcie30phy {
-	rockchip,pcie30-phymode = <PHY_MODE_PCIE_AGGREGATION>;
-	status = "okay";
+ rockchip,pcie30-phymode = <PHY_MODE_PCIE_NANBNB>;
+ status = "okay";
+};
+
+&pcie3x2 {
+ reset-gpios = <&gpio4 RK_PB0 GPIO_ACTIVE_HIGH>;
+ vpcie3v3-supply = <&vcc3v3_pcie30>;
+ status = "okay";
 };
 
 &pcie3x4 {
-	reset-gpios = <&gpio4 RK_PB6 GPIO_ACTIVE_HIGH>;
-	vpcie3v3-supply = <&vcc3v3_pcie30>;
-	status = "okay";
+ num-lanes = <2>;
+ reset-gpios = <&gpio4 RK_PB6 GPIO_ACTIVE_HIGH>;
+ vpcie3v3-supply = <&vcc3v3_pcie30>;
+ status = "okay";
 };
 
 &pinctrl {
@@ -992,11 +999,11 @@
 		};
 	};
 
-	usb {
+	/*usb {
 		vcc5v0_host_en: vcc5v0-host-en {
 			rockchip,pins = <4 RK_PB0 RK_FUNC_GPIO &pcfg_pull_none>;
 		};
-	};
+	};*/
 
 	usb-typec {
 		usbc0_int: usbc0-int {
