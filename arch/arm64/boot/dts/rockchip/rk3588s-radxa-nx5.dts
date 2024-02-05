@@ -50,6 +50,19 @@
 		vin-supply = <&vcc5v0_sys>;
 	};
 
+	bluetooth_power: bluetooth_power {
+		compatible = "regulator-fixed";
+		regulator-name = "vcc_bluetooth";
+		regulator-boot-on;
+		regulator-always-on;
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		enable-active-low;
+		gpio = <&gpio1 RK_PB0 GPIO_ACTIVE_LOW>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&bluetooth_en>;
+	};
+	
 	vcc5v0_otg: vcc5v0-otg-regulator {
 		compatible = "regulator-fixed";
 		regulator-name = "vcc5v0_otg";
@@ -118,13 +131,7 @@
         compatible = "bluetooth-platdata";
         clocks = <&hym8563>;
         clock-names = "ext_clock";
-        uart_rts_gpios = <&gpio1 RK_PD6 GPIO_ACTIVE_LOW>;
-        pinctrl-names = "default", "rts_gpio";
-        pinctrl-0 = <&uart1m1_rtsn>, <&bt_wake_gpio>, <&bt_irq_gpio>;
-        pinctrl-1 = <&uart1_gpios>;
-        BT,wake_gpio     = <&gpio1 RK_PB0 GPIO_ACTIVE_LOW>;
-        BT,wake_host_irq = <&gpio1 RK_PA4 GPIO_ACTIVE_HIGH>;
-        status = "okay";
+        status = "disabled";
 	};
 };
 
@@ -345,17 +352,11 @@
 		};
 	};
 
-	wireless-bluetooth {
-        uart1_gpios: uart1-gpios {
-            rockchip,pins = <1 RK_PD6 RK_FUNC_GPIO &pcfg_pull_none>;
-        };
+	bluetooth {
 
-        bt_wake_gpio: bt-wake-gpio {
+        bluetooth_en: bluetooth_en {
             rockchip,pins = <1 RK_PB0 RK_FUNC_GPIO &pcfg_pull_down>;
         };
 
-        bt_irq_gpio: bt-irq-gpio {
-            rockchip,pins = <1 RK_PA4 RK_FUNC_GPIO &pcfg_pull_none>;
-        };
 	};
 };
