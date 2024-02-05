@@ -59,29 +59,26 @@
 			#address-cells = <1>;
 			#size-cells = <0>;
 
-<<<<<<< HEAD
-			csidcphy1_out: endpoint@0 {
-				reg = <0>;
-				remote-endpoint = <&mipi1_csi2_input>;
-=======
 			csidphy2_out: endpoint@0 {
 				reg = <0>;
 				remote-endpoint = <&mipi3_csi2_input>;
->>>>>>> da6f66672dad (nx5: camera: Add imx219 camera configuration)
 			};
 		};
 	};
 };
 
-<<<<<<< HEAD
 &pinctrl {
 
 	pinctrl-name = "default";
 	pinctrl-0 = <&mipim0_camera0_clk>;
 	
 };
-=======
->>>>>>> da6f66672dad (nx5: camera: Add imx219 camera configuration)
+
+&pinctrl {
+		pinctrl-names = "default";
+		pinctrl-0 = <&mipim0_camera0_clk>;
+};
+>>>>>>> afb7b112bf71 (dts :nx5_rkr14 : imx219)
 
 &i2c4 {
 	status = "okay";
@@ -99,11 +96,7 @@
 		//avdd-supply = <&vcc_mipidphy0>;
 		rockchip,camera-module-index = <0>;
 		rockchip,camera-module-facing = "back";
-<<<<<<< HEAD
-		rockchip,camera-module-name = "imx219";
-=======
-		rockchip,camera-module-name = "default";
->>>>>>> da6f66672dad (nx5: camera: Add imx219 camera configuration)
+		rockchip,camera-module-name = "rpi-camera-v2";
 		rockchip,camera-module-lens-name = "default";
 		//lens-focus = <&cam_ircut0>;
 		port {
@@ -126,22 +119,15 @@
 		reg = <0x10>;
 		clocks = <&cru CLK_MIPI_CAMARAOUT_M0>;
 		clock-names = "xvclk";
-<<<<<<< HEAD
-=======
+
 		pinctrl-names = "default";
-		pinctrl-0 = <&mipim0_camera0_clk>;
->>>>>>> da6f66672dad (nx5: camera: Add imx219 camera configuration)
 		power-domains = <&power RK3588_PD_VI>;
 		pwdn-gpios = <&gpio1 RK_PA6 GPIO_ACTIVE_HIGH>;
 		//reset-gpios = <&gpio4 RK_PB1 GPIO_ACTIVE_LOW>;
 		//avdd-supply = <&vcc_mipidphy0>;
 		rockchip,camera-module-index = <1>;
 		rockchip,camera-module-facing = "front";
-<<<<<<< HEAD
-		rockchip,camera-module-name = "imx219";
-=======
-		rockchip,camera-module-name = "default";
->>>>>>> da6f66672dad (nx5: camera: Add imx219 camera configuration)
+		rockchip,camera-module-name = "rpi-camera-v2";
 		rockchip,camera-module-lens-name = "default";
 		//lens-focus = <&cam_ircut0>;
 		port {
@@ -204,15 +190,9 @@
 			#address-cells = <1>;
 			#size-cells = <0>;
 
-<<<<<<< HEAD
-			mipi1_csi2_input: endpoint@1 {
-				reg = <1>;
-				remote-endpoint = <&csidcphy1_out>;
-=======
 			mipi3_csi2_input: endpoint@1 {
 				reg = <1>;
 				remote-endpoint = <&csidphy2_out>;
->>>>>>> da6f66672dad (nx5: camera: Add imx219 camera configuration)
 			};
 		};
 
@@ -221,26 +201,14 @@
 			#address-cells = <1>;
 			#size-cells = <0>;
 
-<<<<<<< HEAD
-			mipi1_csi2_output: endpoint@0 {
-				reg = <0>;
-				remote-endpoint = <&cif_mipi_in1>;
-=======
 			mipi3_csi2_output: endpoint@0 {
 				reg = <0>;
 				remote-endpoint = <&cif_mipi_in3>;
->>>>>>> da6f66672dad (nx5: camera: Add imx219 camera configuration)
 			};
 		};
 	};
 };
 
-<<<<<<< HEAD
-&rkcif {
-	status = "okay";
-};
-=======
->>>>>>> da6f66672dad (nx5: camera: Add imx219 camera configuration)
 
 &rkcif_mipi_lvds {
 	status = "okay";
