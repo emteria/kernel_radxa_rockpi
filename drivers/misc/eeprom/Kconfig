@@ -5,7 +5,6 @@ config EEPROM_AT24
 	depends on I2C && SYSFS
 	select NVMEM
 	select REGMAP_I2C
-	select EEPROM_VAMRS
 	help
 	  Enable this driver to get read/write support to most I2C EEPROMs
 	  and compatible devices like FRAMs, SRAMs, ROMs etc. After you
@@ -41,11 +40,6 @@ config EEPROM_AT25
 
 	  This driver can also be built as a module.  If so, the module
 	  will be called at25.
-
-config EEPROM_VAMRS
-	tristate "Reading custom data from EEPROM."
-	help
-        The driver reads custom SN (Serial Number), MAC address, and other data from the EEPROM
 
 config EEPROM_LEGACY
 	tristate "Old I2C EEPROM reader"

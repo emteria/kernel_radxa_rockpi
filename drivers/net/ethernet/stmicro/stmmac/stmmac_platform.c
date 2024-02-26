@@ -526,12 +526,6 @@ stmmac_probe_config_dt(struct platform_device *pdev, const char **mac)
 
 	of_property_read_u32(np, "snps,ps-speed", &plat->mac_port_sel_speed);
 
-	rc = of_property_read_u32(np, "eeprom_mac_address", &plat->eeprom_mac_address);
-	if (rc) {
-		plat->eeprom_mac_address = 0;
-		dev_err(&pdev->dev, "Can not read property: eeprom_mac_address.");
-	}
-
 	plat->axi = stmmac_axi_setup(pdev);
 
 	rc = stmmac_mtl_setup(pdev, plat);

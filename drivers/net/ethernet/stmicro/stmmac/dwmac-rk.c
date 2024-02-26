@@ -2263,21 +2263,7 @@ static struct platform_driver rk_gmac_dwmac_driver = {
 		.of_match_table = rk_gmac_dwmac_match,
 	},
 };
-
-static int __init rk_gmac_driver_init(void)
-{
-    return platform_driver_register(&rk_gmac_dwmac_driver);
-}
-
-static void __exit rk_gmac_driver_exit(void)
-{
-    platform_driver_unregister(&rk_gmac_dwmac_driver);
-}
-
-
-late_initcall(rk_gmac_driver_init);
-module_exit(rk_gmac_driver_exit);
-//module_platform_driver(rk_gmac_dwmac_driver);
+module_platform_driver(rk_gmac_dwmac_driver);
 
 MODULE_AUTHOR("Chen-Zhi (Roger Chen) <roger.chen@rock-chips.com>");
 MODULE_DESCRIPTION("Rockchip RK3288 DWMAC specific glue layer");

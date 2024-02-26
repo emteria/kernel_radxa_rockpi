@@ -717,10 +717,11 @@
 		};
 	};
 
-	eeprom@50 {
-       status = "okay";
-	   compatible = "atmel,24c16";
-	   reg = <0x50>;
+    at24c08@50 {
+        status = "okay";
+        compatible = "atmel,24c08";
+        reg = <0x50>;
+        pagesize = <8>;
     };
 };
 
@@ -1155,7 +1156,7 @@
 };
 
 &gpio_keys {
-    status = "disabled";
+    status = "okay";
     autorepeat;
 	pinctrl-names = "default";
 	pinctrl-0 = <&pwrbtn>;
@@ -1172,7 +1173,6 @@
 &gmac {
 	phy-supply = <&vcc_phy>;
 	phy-mode = "rgmii";
-	eeprom_mac_address = <1>;
 	clock_in_out = "input";
 	snps,reset-gpio = <&gpio3 15 GPIO_ACTIVE_LOW>;
 	snps,reset-active-low;

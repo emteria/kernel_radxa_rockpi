@@ -119,10 +119,6 @@ static int stmmac_init_fs(struct net_device *dev);
 static void stmmac_exit_fs(struct net_device *dev);
 #endif
 
-#ifdef CONFIG_EEPROM_VAMRS
-extern char vamrs_mac_address[8][6];
-#endif
-
 #define STMMAC_COAL_TIMER(x) (jiffies + usecs_to_jiffies(x))
 
 /**
@@ -4313,11 +4309,6 @@ int stmmac_dvr_probe(struct device *device,
 
 	if (res->mac)
 		memcpy(priv->dev->dev_addr, res->mac, ETH_ALEN);
-
-#ifdef CONFIG_EEPROM_VAMRS
-    if(plat_dat->eeprom_mac_address == 1)
-        priv->dev->dev_addr = vamrs_mac_address[0];
-#endif
 
 	dev_set_drvdata(device, priv->dev);
 

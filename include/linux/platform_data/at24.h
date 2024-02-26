@@ -57,6 +57,4 @@ struct at24_platform_data {
 	void		*context;
 };
 
-int at24_custom_read(unsigned int off, void *val, size_t count);
-
 #endif /* _LINUX_AT24_H */
