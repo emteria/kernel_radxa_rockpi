@@ -62,6 +62,20 @@
 		pinctrl-names = "default";
 		pinctrl-0 = <&bluetooth_en>;
 	};
+
+	fan_power: fan_power {
+		compatible = "regulator-fixed";
+		regulator-name = "vcc_fan";
+		regulator-boot-on;
+		regulator-always-on;
+		regulator-min-microvolt = <5000000>;
+		regulator-max-microvolt = <5000000>;
+		enable-active-high;
+		gpio = <&gpio4 RK_PB5 GPIO_ACTIVE_HIGH>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&fan_en>;
+		vin-supply = <&vcc5v0_sys>;
+	};
 	
 	vcc5v0_otg: vcc5v0-otg-regulator {
 		compatible = "regulator-fixed";
@@ -353,10 +367,14 @@
 	};
 
 	bluetooth {
-
         bluetooth_en: bluetooth_en {
             rockchip,pins = <1 RK_PB0 RK_FUNC_GPIO &pcfg_pull_down>;
         };
+	};
 
+	fan {
+        fan_en: fan_en {
+            rockchip,pins = <4 RK_PB5 RK_FUNC_GPIO &pcfg_pull_up>;
+        };
 	};
 };
