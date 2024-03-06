@@ -28,6 +28,16 @@
 #include "stmmac_platform.h"
 #include "dwmac-rk-tool.h"
 
+#include <asm/system_info.h>
+
+static int mac_from_sn = 1;
+
+#define RTL_8211F_PHY_ID        0x001cc916
+#define RTL_8211F_PHY_ID_MASK   0x001fffff
+#define RTL_8211F_PAGE_SELECT   0x1f
+#define RTL_8211F_LCR_ADDR      0x10
+#define RTL_8211F_EEELCR_ADDR   0x11
+
 #define MAX_ETH		2
 
 struct rk_priv_data;
@@ -1942,6 +1952,34 @@ static void rk3588_set_to_rgmii(struct rk_priv_data *bsp_priv,
 		     DELAY_VALUE(RK3588, tx_delay, rx_delay));
 }
 
+static int phy_rtl8211f_led_fixup(struct phy_device *phydev)
+{
+    u32 val, val2;
+
+    printk("%s\n", __func__);
+
+    /*switch to page0xd04*/
+    phy_write(phydev, RTL_8211F_PAGE_SELECT, 0xd04);
+
+    /*set led1(green) Link 10/100/1000M, and set led2(yellow) Link 10/100/1000M+Active*/
+    val = phy_read(phydev, RTL_8211F_LCR_ADDR);
+    val |= (1<<5);
+    val |= (1<<8);
+    val &= (~(1<<9));
+    val |= (1<<10);
+    val |= (1<<11);
+    phy_write(phydev, RTL_8211F_LCR_ADDR, val);
+
+    /*set led1(green) EEE LED function disabled so it can keep on when linked*/
+    val2 = phy_read(phydev, RTL_8211F_EEELCR_ADDR);
+    val2 &= (~(1<<2));
+    phy_write(phydev, RTL_8211F_EEELCR_ADDR, val2);
+
+    /*switch back to page0*/
+    phy_write(phydev,RTL_8211F_PAGE_SELECT, 0xa42);
+    return 0;
+}
+
 static void rk3588_set_to_rmii(struct rk_priv_data *bsp_priv)
 {
 	struct device *dev = &bsp_priv->pdev->dev;
@@ -2713,6 +2751,18 @@ EXPORT_SYMBOL(dwmac_rk_get_phy_interface);
 
 static void rk_get_eth_addr(void *priv, unsigned char *addr)
 {
+  	if (mac_from_sn == 0) {
+		unsigned int serial;
+		serial = system_serial_low | system_serial_high;
+		addr[0] = 0;
+		addr[1] = 0;
+		addr[2] = 0xa4;
+		addr[3] = 0x10 + (serial >> 24);
+		addr[4] = serial >> 16;
+		addr[5] = serial >> 8;
+		printk("eth mac address  = %x:%x:%x:%x:%x:%x\n",addr[0],addr[1],addr[2],addr[3],addr[4],addr[5]);
+		return;
+	}
 	struct rk_priv_data *bsp_priv = priv;
 	struct device *dev = &bsp_priv->pdev->dev;
 	unsigned char ethaddr[ETH_ALEN * MAX_ETH] = {0};
@@ -2758,6 +2808,7 @@ static int rk_gmac_probe(struct platform_device *pdev)
 	struct stmmac_resources stmmac_res;
 	const struct rk_gmac_ops *data;
 	int ret;
+	u8 value;
 
 	data = of_device_get_match_data(&pdev->dev);
 	if (!data) {
@@ -2775,6 +2826,16 @@ static int rk_gmac_probe(struct platform_device *pdev)
 
 	if (!of_device_is_compatible(pdev->dev.of_node, "snps,dwmac-4.20a"))
 		plat_dat->has_gmac = true;
+	
+	mac_from_sn = of_property_read_u8(pdev->dev.of_node,"mac_from_sn",&value);
+	if (mac_from_sn < 0) {
+    	printk("dont use mac_address from cpu_sn,  in :%s.\n", __func__);
+    }
+
+	ret = phy_register_fixup_for_uid(RTL_8211F_PHY_ID, RTL_8211F_PHY_ID_MASK, phy_rtl8211f_led_fixup);
+	if (ret) {
+    	printk("Cannot register PHY board fixup,  in :%s.\n", __func__);
+    }
 
 	plat_dat->sph_disable = true;
 	plat_dat->fix_mac_speed = rk_fix_speed;
