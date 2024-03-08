@@ -9,7 +9,10 @@
 
 #include "rk3588s-radxa-cm5.dtsi"
 #include "rk3588s-radxa-cm5-radxa-10inch-display.dtsi"
-#include "rk3588-radxa-cm5-imx415.dtsi"
+// #include "rk3588s-radxa-cm5-radxa-8inch-display.dtsi"
+// #include "rk3588-radxa-cm5-imx415.dtsi"
+#include "rk3588s-radxa-cm5io-imx219.dtsi"
+// #include "rk3588s-radxa-cm5-raspi-7-inch-touchscreen.dtsi"
 
 / {
 	model = "Radxa CM5 IO";
@@ -294,8 +297,10 @@
 	es8316: es8316@11 {
 		compatible = "everest,es8316";
 		reg = <0x11>;
-		clocks = <&cru I2S0_8CH_MCLKOUT>;
+		clocks = <&mclkout_i2s0>;
 		clock-names = "mclk";
+		assigned-clocks = <&mclkout_i2s0>;
+		assigned-clock-rates = <12288000>;
 		pinctrl-names = "default";
 		pinctrl-0 = <&i2s0_mclk>;
 		#sound-dai-cells = <0>;
@@ -342,6 +347,7 @@
 
 &route_hdmi0 {
 	status = "okay";
+	connect = <&vp0_out_hdmi0>;
 };
 
 &hdptxphy_hdmi0 {
@@ -363,25 +369,21 @@
 &vp0 {
 	rockchip,plane-mask = <(1 << ROCKCHIP_VOP2_CLUSTER0 | 1 << ROCKCHIP_VOP2_ESMART0)>;
 	rockchip,primary-plane = <ROCKCHIP_VOP2_CLUSTER0>;
-	cursor-win-id = <ROCKCHIP_VOP2_ESMART0>;
 };
 
 &vp1 {
 	rockchip,plane-mask = <(1 << ROCKCHIP_VOP2_CLUSTER1 | 1 << ROCKCHIP_VOP2_ESMART1)>;
 	rockchip,primary-plane = <ROCKCHIP_VOP2_CLUSTER1>;
-	cursor-win-id = <ROCKCHIP_VOP2_ESMART1>;
 };
 
 &vp2 {
 	rockchip,plane-mask = <(1 << ROCKCHIP_VOP2_CLUSTER2 | 1 << ROCKCHIP_VOP2_ESMART2)>;
 	rockchip,primary-plane = <ROCKCHIP_VOP2_CLUSTER2>;
-	cursor-win-id = <ROCKCHIP_VOP2_ESMART2>;
 };
 
 &vp3 {
 	rockchip,plane-mask = <(1 << ROCKCHIP_VOP2_CLUSTER3 | 1 << ROCKCHIP_VOP2_ESMART3)>;
 	rockchip,primary-plane = <ROCKCHIP_VOP2_CLUSTER3>;
-	cursor-win-id = <ROCKCHIP_VOP2_ESMART3>;
 };
 
 &display_subsystem {
@@ -554,6 +556,7 @@
 	cap-sd-highspeed;
 	disable-wp;
 	sd-uhs-sdr104;
+	supports-emmc;
 	vmmc-supply = <&vcc_3v3_s3>;
 	vqmmc-supply = <&vccio_sd_s0>;
 	pinctrl-names = "default";
