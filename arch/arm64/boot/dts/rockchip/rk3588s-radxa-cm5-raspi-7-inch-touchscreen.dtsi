@@ -1,0 +1,117 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright (c) 2021 Rockchip Electronics Co., Ltd.
+ */
+
+#include <dt-bindings/display/rockchip_vop.h>
+
+/ {
+	compatible = "radxa,rock-cm5", "rockchip,rk3588s";
+};
+
+&mipi_dcphy0 {
+    status = "okay";
+};
+
+&dsi0 {
+	status = "okay";
+	#address-cells = <1>;
+    #size-cells = <0>;
+    rockchip,lane-rate = <605>;
+
+
+	dsi0_panel: dsi-panel@0 {
+		compatible = "raspits,tc358762";
+		reg = <0x0>;
+		status = "okay";
+
+		ports {
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			port@0 {
+				reg = <0>;
+
+				panel_in_dsi0: endpoint {
+					remote-endpoint = <&dsi0_out_panel>;
+				};
+			};
+		};
+	};
+
+	ports {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		port@1 {
+			reg = <1>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			dsi0_out_panel: endpoint@0 {
+				reg = <0>;
+				remote-endpoint = <&panel_in_dsi0>;
+			};
+		};
+	};
+};
+
+&dsi0_in_vp3 {
+	status = "disabled";
+};
+
+&dsi0_in_vp2 {
+	status = "okay";
+};
+
+// &route_dsi0 {
+// 	status = "okay";
+// 	connect = <&vp2_out_dsi0>;
+// };
+
+&i2c7 {
+	status = "okay";
+	pinctrl-0 = <&i2c7m2_xfer>;
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	// chipone_icn8952: chipone_icn8952@30 {
+	// 	compatible = "chipone_icn8505";
+	// 	reg = <0x30>;
+	// 	status = "okay";
+	// };
+
+/*
+    rockpi_ft5406: rockpi_ft5406@38 {
+		compatible = "rockpi_ft5406";
+		reg = <0x38>;
+		status = "okay";
+	};
+*/
+    focaltech: focaltech@38 {
+               status = "okay";
+               compatible = "radxa,fts";
+               reg = <0x38>;
+               irq_mode = <0>; //0 poll ,1 irq
+               x_reverse = <1>;
+               y_reverse = <1>;
+               xy_swap = <0>;
+               focaltech,display-coords =  <0 0 800 480>;
+               focaltech,max-touch-number = <5>;
+     };
+
+	rockpi_mcu: rockpi-mcu@45 {
+		compatible = "rockpi_mcu";
+		reg = <0x45>;
+		status = "okay";
+	};
+};
+
+&pinctrl {
+	mipi {
+		vcc_mipi_en: vcc-mipi-en {
+			rockchip,pins = <0 RK_PC7 RK_FUNC_GPIO &pcfg_output_high>;
+		};
+	};
+
+};
