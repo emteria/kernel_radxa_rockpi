@@ -5,7 +5,7 @@
  */
 
 / {
-	compatible = "radxa,rock-5a", "rockchip,rk3588s";
+	compatible = "radxa,rock-cm5", "rockchip,rk3588s";
 
 	vcc_lcd1_3v3: vcc-lcd-3v3 {
 		status = "okay";
@@ -137,7 +137,7 @@
 	clock-frequency = <400000>;
 
 	gt9xx: gt9xx@14 {
-		status = "disabled";
+		status = "okay";
 		compatible = "goodix,gt9xx";
 		reg = <0x14>;
 		pinctrl-names = "default";
