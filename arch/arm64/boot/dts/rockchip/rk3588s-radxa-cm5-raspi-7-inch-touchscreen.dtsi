@@ -88,7 +88,7 @@
 		status = "okay";
 	};
 */
-    focaltech: focaltech@38 {
+    focaltech1: focaltech1@38 {
                status = "okay";
                compatible = "radxa,fts";
                reg = <0x38>;

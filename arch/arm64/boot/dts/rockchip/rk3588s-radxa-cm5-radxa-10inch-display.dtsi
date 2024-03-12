@@ -159,6 +159,7 @@
 		focaltech,irq-gpio = <&gpio1 RK_PB5 IRQ_TYPE_LEVEL_LOW>;
 		focaltech,reset-gpio = <&gpio1 RK_PB4 GPIO_ACTIVE_HIGH>;
 		focaltech,display-coords = <0 0 799 1279>;
+		focaltech,max-touch-number = <5>;
 	};
 };
 
