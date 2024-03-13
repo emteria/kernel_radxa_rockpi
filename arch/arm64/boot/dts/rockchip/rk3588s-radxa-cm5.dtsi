@@ -190,6 +190,14 @@
 	status = "okay";
 };
 
+&avsd {
+	status = "okay";
+};
+
+&av1d_mmu {
+	status = "okay";
+};
+
 &rga3_core0 {
 	status = "okay";
 };
