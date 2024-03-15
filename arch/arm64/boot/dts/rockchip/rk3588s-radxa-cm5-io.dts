@@ -9,9 +9,9 @@
 
 #include "rk3588s-radxa-cm5.dtsi"
 #include "rk3588s-radxa-cm5-radxa-10inch-display.dtsi"
+// #include "rk3588s-radxa-cm5-radxa-10inch-FHD-display.dtsi"
 // #include "rk3588s-radxa-cm5-radxa-8inch-display.dtsi"
-// #include "rk3588-radxa-cm5-imx415.dtsi"
-#include "rk3588s-radxa-cm5io-imx219.dtsi"
+#include "rk3588s-radxa-cm5io-camera.dtsi"
 // #include "rk3588s-radxa-cm5-raspi-7-inch-touchscreen.dtsi"
 
 / {
@@ -96,6 +96,20 @@
 		io-channels = <&saradc 3>;
 	};
 
+	fan: pwm-fan {
+		compatible = "pwm-fan";
+		#cooling-cells = <2>;
+		pwms = <&pwm13 0 50000 0>;
+		cooling-levels = <0 50 100 150 200 255>;
+		rockchip,temp-trips = <
+			50000	1
+			55000	2
+			60000	3
+			65000	4
+			70000	5
+		>;
+	};
+
 	vcc3v3_sys: vcc3v3-sys {
 		compatible = "regulator-fixed";
 		regulator-name = "vcc3v3_sys";
@@ -132,24 +146,6 @@
 		startup-delay-us = <50000>;
 		vin-supply = <&vcc5v0_sys>;
 	};
-
-	// wifi_disable: wifi-diable-gpio-regulator {
-	// 	compatible = "regulator-fixed";
-	// 	regulator-name = "wifi_disable";
-	// 	enable-active-high;
-	// 	gpio = <&gpio0 RK_PD4 GPIO_ACTIVE_HIGH>;
-	// 	regulator-boot-on;
-	// 	regulator-always-on;
-	// };
-
-	// bt_wake: bt-wake-gpio-regulator {
-	// 	compatible = "regulator-fixed";
-	// 	regulator-name = "bt_wake";
-	// 	enable-active-high;
-	// 	gpio = <&gpio0 RK_PC6 GPIO_ACTIVE_HIGH>;
-	// 	regulator-boot-on;
-	// 	regulator-always-on;
-	// };
 
 	wireless_wlan: wireless-wlan {
         compatible = "wlan-platdata";
