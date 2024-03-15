@@ -63,18 +63,18 @@
 		pinctrl-0 = <&bluetooth_en>;
 	};
 
-	fan_power: fan_power {
-		compatible = "regulator-fixed";
-		regulator-name = "vcc_fan";
-		regulator-boot-on;
-		regulator-always-on;
-		regulator-min-microvolt = <5000000>;
-		regulator-max-microvolt = <5000000>;
-		enable-active-high;
-		gpio = <&gpio4 RK_PB5 GPIO_ACTIVE_HIGH>;
-		pinctrl-names = "default";
-		pinctrl-0 = <&fan_en>;
-		vin-supply = <&vcc5v0_sys>;
+	fan: pwm-fan {
+		compatible = "pwm-fan";
+		#cooling-cells = <2>;
+		pwms = <&pwm12 0 50000 0>;
+		cooling-levels = <0 50 100 150 200 255>;
+		rockchip,temp-trips = <
+                50000   1
+                55000   2
+                60000   3
+                65000   4
+                70000   5
+        >;
 	};
 	
 	vcc5v0_otg: vcc5v0-otg-regulator {
@@ -155,8 +155,18 @@
 	pinctrl-0 = <&uart1m1_xfer &uart1m1_ctsn>;
 };
 
+&pwm12 {
+	pinctrl-0 = <&pwm12m1_pins>;
+	status = "okay";
+};
+
 &combphy0_ps {
 	status = "okay";
+};
+
+&rockchip_suspend {
+        status = "okay";
+        rockchip,sleep-debug-en = <1>;
 };
 
 &pcie2x1l2 {
@@ -270,7 +280,7 @@
 
 &hdmi0 {
 	enable-gpios = <&gpio4 RK_PB0 GPIO_ACTIVE_HIGH>;
-	cec_enable = <1>;
+	cec-enable = <1>;
 	status = "okay";
 };
 
@@ -373,9 +383,4 @@
         };
 	};
 
-	fan {
-        fan_en: fan_en {
-            rockchip,pins = <4 RK_PB5 RK_FUNC_GPIO &pcfg_pull_up>;
-        };
-	};
 };
