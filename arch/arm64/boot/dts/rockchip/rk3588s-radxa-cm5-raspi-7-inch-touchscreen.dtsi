@@ -64,10 +64,10 @@
 	status = "okay";
 };
 
-// &route_dsi0 {
-// 	status = "okay";
-// 	connect = <&vp2_out_dsi0>;
-// };
+&route_dsi0 {
+	status = "okay";
+	connect = <&vp2_out_dsi0>;
+};
 
 &i2c7 {
 	status = "okay";
