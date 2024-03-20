@@ -1965,9 +1965,10 @@ static int phy_rtl8211f_led_fixup(struct phy_device *phydev)
     val = phy_read(phydev, RTL_8211F_LCR_ADDR);
     val |= (1<<5);
     val |= (1<<8);
-    val &= (~(1<<9));
+    val |= (1<<9);		//led1(green Active 1 ;keep on 0)
     val |= (1<<10);
     val |= (1<<11);
+	val &= (~(1<<14));	//led2(yellow Active 1 ;keep on 0)
     phy_write(phydev, RTL_8211F_LCR_ADDR, val);
 
     /*set led1(green) EEE LED function disabled so it can keep on when linked*/
