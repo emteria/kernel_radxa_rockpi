@@ -16,11 +16,7 @@
 			#address-cells = <1>;
 			#size-cells = <0>;
 
-<<<<<<< HEAD
 			mipi_in_dcphy0: endpoint@1 {
-=======
-			mipi_in_dcphy0: endpoint@2 {
->>>>>>> 48411412c6da (add imx219 driver,dts: nx5: rk3588s-radxa-nx5-imx219.dtsi)
 				reg = <1>;
 				remote-endpoint = <&imx219_out0>;
 				data-lanes = <1 2>;
@@ -82,7 +78,6 @@
 		pinctrl-names = "default";
 		pinctrl-0 = <&mipim0_camera0_clk>;
 };
->>>>>>> afb7b112bf71 (dts :nx5_rkr14 : imx219)
 
 &i2c4 {
 	status = "okay";
