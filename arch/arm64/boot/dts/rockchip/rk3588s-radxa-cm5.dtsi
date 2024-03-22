@@ -284,6 +284,7 @@
 &gmac1 {
 	phy-mode = "rgmii";
 	clock_in_out = "output";
+	mac_from_sn = "ok";
 
 	snps,reset-gpio = <&gpio3 RK_PB2 GPIO_ACTIVE_LOW>;
 	snps,reset-active-low;

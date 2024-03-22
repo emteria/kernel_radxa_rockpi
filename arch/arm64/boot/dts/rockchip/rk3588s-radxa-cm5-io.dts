@@ -8,11 +8,11 @@
 /dts-v1/;
 
 #include "rk3588s-radxa-cm5.dtsi"
-#include "rk3588s-radxa-cm5-radxa-10inch-display.dtsi"
-// #include "rk3588s-radxa-cm5-radxa-10inch-FHD-display.dtsi"
+// #include "rk3588s-radxa-cm5-radxa-10inch-display.dtsi"
+#include "rk3588s-radxa-cm5-radxa-10inch-FHD-display.dtsi"
 // #include "rk3588s-radxa-cm5-radxa-8inch-display.dtsi"
 #include "rk3588s-radxa-cm5io-camera.dtsi"
-// #include "rk3588s-radxa-cm5-raspi-7-inch-touchscreen.dtsi"
+#include "rk3588s-radxa-cm5-raspi-7-inch-touchscreen.dtsi"
 
 / {
 	model = "Radxa CM5 IO";
@@ -99,7 +99,7 @@
 	fan: pwm-fan {
 		compatible = "pwm-fan";
 		#cooling-cells = <2>;
-		pwms = <&pwm13 0 50000 0>;
+		pwms = <&pwm11 0 50000 0>;
 		cooling-levels = <0 50 100 150 200 255>;
 		rockchip,temp-trips = <
 			50000	1
@@ -282,8 +282,13 @@
 	status = "okay";
 };
 
-&dp0_in_vp2 {
+&dp0_in_vp1 {
 	status = "okay";
+};
+
+&route_dp0 {
+	status = "okay";
+	connect = <&vp1_out_dp0>;
 };
 
 &i2c8 {
