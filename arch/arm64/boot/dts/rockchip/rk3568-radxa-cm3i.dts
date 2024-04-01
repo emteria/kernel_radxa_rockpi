@@ -4,10 +4,11 @@
  *
  */
 
-#include "rk3568-radxa-e61.dtsi"
+
+#include "rk3568-radxa-cm3i.dtsi"
 #include "rk3568-android.dtsi"
 
 / {
-	model = "Rockchip RK3568 E61 Board";
-	compatible = "rockchip,rk3568-radxa-e61", "rockchip,rk3568";
+	model = "Rockchip RK3568 CM3i Board";
+	compatible = "rockchip,rk3568-radxa-cm3i", "rockchip,rk3568";
 };
