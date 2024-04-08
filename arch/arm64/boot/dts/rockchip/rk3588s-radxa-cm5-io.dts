@@ -9,7 +9,9 @@
 
 #include "rk3588s-radxa-cm5.dtsi"
 // #include "rk3588s-radxa-cm5-radxa-10inch-display.dtsi"
-#include "rk3588s-radxa-cm5-radxa-10inch-FHD-display.dtsi"
+// #include "rk3588s-radxa-cm5io-radxa-10inch-display.dtsi"
+// #include "rk3588s-radxa-cm5-radxa-10inch-FHD-display.dtsi"
+#include "rk3588s-radxa-cm5io-radxa-10inch-FHD-display.dtsi"
 // #include "rk3588s-radxa-cm5-radxa-8inch-display.dtsi"
 #include "rk3588s-radxa-cm5io-camera.dtsi"
 #include "rk3588s-radxa-cm5-raspi-7-inch-touchscreen.dtsi"
@@ -153,8 +155,8 @@
         wifi_chip_type = "rtl8852b";
         pinctrl-names = "default";
         pinctrl-0 = <&wifi_host_wake_irq>, <&wifi_poweren_gpio>;
-        WIFI,host_wake_irq = <&gpio1 RK_PA0 GPIO_ACTIVE_HIGH>;
-        WIFI,poweren_gpio = <&gpio1 RK_PA1 GPIO_ACTIVE_HIGH>;
+        WIFI,host_wake_irq = <&gpio1 RK_PA1 GPIO_ACTIVE_HIGH>;
+        WIFI,poweren_gpio = <&gpio3 RK_PC6 GPIO_ACTIVE_HIGH>;
         status = "okay";
 	};
 
@@ -388,15 +390,6 @@
 	rockchip,primary-plane = <ROCKCHIP_VOP2_CLUSTER3>;
 };
 
-&display_subsystem {
-	clocks = <&hdptxphy_hdmi_clk0>;
-	clock-names = "hdmi0_phy_pll";
-};
-
-&hdptxphy_hdmi_clk0 {
-	status = "okay";
-};
-
 &pinctrl {
 
 	usb {
@@ -443,11 +436,11 @@
 
 	wireless-wlan {
         wifi_host_wake_irq: wifi-host-wake-irq {
-                rockchip,pins = <1 RK_PA0 RK_FUNC_GPIO &pcfg_pull_down>;
+                rockchip,pins = <1 RK_PA1 RK_FUNC_GPIO &pcfg_pull_down>;
         };
 
         wifi_poweren_gpio: wifi-poweren-gpio {
-                rockchip,pins = <1 RK_PA1 RK_FUNC_GPIO &pcfg_pull_up>;
+                rockchip,pins = <3 RK_PC6 RK_FUNC_GPIO &pcfg_pull_up>;
         };
     };
 
