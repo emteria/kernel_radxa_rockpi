@@ -828,10 +828,10 @@ static int fts_read_touchdata(struct fts_ts_data *data)
         }
     }
 
-    if (data->point_num > max_touch_num) {
-        FTS_INFO("invalid point_num(%d)", data->point_num);
-        return -EIO;
-    }
+    // if (data->point_num > max_touch_num) {
+    //     FTS_INFO("invalid point_num(%d)", data->point_num);
+    //     return -EIO;
+    // }
 
 #if (FTS_DEBUG_EN && (FTS_DEBUG_LEVEL == 2))
     fts_show_touch_buffer(buf, data->point_num);
@@ -864,10 +864,10 @@ static int fts_read_touchdata(struct fts_ts_data *data)
             return -EIO;
         }
     }
-    if (data->touch_point == 0) {
-        FTS_INFO("no touch point information");
-        return -EIO;
-    }
+    // if (data->touch_point == 0) {
+    //     FTS_INFO("no touch point information");
+    //     return -EIO;
+    // }
 
     return 0;
 }
