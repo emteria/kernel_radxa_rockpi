@@ -762,6 +762,22 @@ config LEDS_NIC78BX
 	  To compile this driver as a module, choose M here: the module
 	  will be called leds-nic78bx.
 
+config LEDS_ELC_TWO
+	tristate "WA series two leds support"
+	depends on LEDS_CLASS
+	help
+	  This option enables support for userspace LEDs. Say 'y' to enable this
+	  support in kernel. To compile this driver as a module, choose 'm' here:
+	  the module will be called uleds.
+
+config LEDS_ELC_FOUR
+	tristate "WA series four leds support"
+	depends on LEDS_CLASS
+	help
+	  This option enables support for userspace LEDs. Say 'y' to enable this
+	  support in kernel. To compile this driver as a module, choose 'm' here:
+	  the module will be called uleds.
+	  	  
 comment "LED Triggers"
 source "drivers/leds/trigger/Kconfig"
 

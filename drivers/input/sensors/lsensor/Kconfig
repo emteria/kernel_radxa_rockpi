@@ -46,5 +46,9 @@ config LS_STK3410
 
 config LS_EM3071X
 	tristate "light sensor em3071x"
+	
+config LS_ORAP3087
+       bool "light sensor orap3087"
+       default n
 endif
 

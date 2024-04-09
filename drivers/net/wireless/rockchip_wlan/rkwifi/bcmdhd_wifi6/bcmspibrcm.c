@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: GPL-2.0 */
 /*
  * Broadcom BCMSDH to gSPI Protocol Conversion Layer
  *

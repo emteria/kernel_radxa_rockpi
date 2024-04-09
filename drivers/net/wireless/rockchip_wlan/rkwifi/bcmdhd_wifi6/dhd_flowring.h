@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: GPL-2.0 */
 /*
  * @file Header file describing the flow rings DHD interfaces.
  *

@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: GPL-2.0 */
 /*
  * Fundamental types and constants relating to WFA P2P (aka WiFi Direct)
  *

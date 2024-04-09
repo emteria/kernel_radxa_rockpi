@@ -316,6 +316,11 @@ config DP83867_PHY
 	---help---
 	  Currently supports the DP83867 PHY.
 
+config MOTORCOMM_PHY
+	tristate "Motorcomm PHYs"
+	---help---
+	  Supports the YT8010, YT8510, YT8511, YT8512 PHYs.
+	  
 config FIXED_PHY
 	tristate "MDIO Bus/PHY emulation with fixed speed/link PHYs"
 	depends on PHYLIB

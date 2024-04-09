@@ -118,6 +118,17 @@ config TOUCHSCREEN_AR1021_I2C
 	  To compile this driver as a module, choose M here: the
 	  module will be called ar1021_i2c.
 
+config TOUCHSCREEN_HIMAX_CHIPSET
+    bool "Himax touchpanel CHIPSET"
+    depends on I2C
+    help
+      Say Y here if you have a Himax CHIPSET touchscreen.
+      HIMAX controllers are multi touch controllers which can
+      report 10 touches at a time.
+
+      If unsure, say N.
+    source "drivers/input/touchscreen/hxchipset/Kconfig"
+
 config TOUCHSCREEN_ATMEL_MXT
 	tristate "Atmel mXT I2C Touchscreen"
 	depends on I2C
@@ -454,6 +465,15 @@ config TOUCHSCREEN_GT9XX
 	  code includes that in its table of IIC devices.
 	  If unsure, say N.
 
+config TOUCHSCREEN_GT9XX2
+	tristate "Goodix gt9xx2 support for rockchip platform"
+	depends on I2C && ARCH_ROCKCHIP
+	help
+	  Say Y here if you have a touchscreen interface using the gt9xx
+	  on Rockchip platform, and your board-specific initialization
+	  code includes that in its table of IIC devices.
+	  If unsure, say N.
+
 config TOUCHSCREEN_HIDEEP
 	tristate "HiDeep Touch IC"
 	depends on I2C
@@ -503,6 +523,21 @@ config TOUCHSCREEN_IPROC
 
 	  To compile this driver as a module, choose M here: the
 	  module will be called bcm_iproc_tsc.
+
+config TOUCHSCREEN_WDT8913
+	tristate "WDT8913 based touchscreen"
+	depends on I2C
+	help
+	  Say Y here if you have a WDT8913 based touchscreen
+	  controller. This driver supports models WDT8913.
+	  Such kind of chipsets can be found in Amazon Kindle Fire
+	  touchscreens.
+
+	  If unsure, say N.
+
+	  To compile this driver as a module, choose M here: the
+	  module will be called WDT8913.
+
 
 config TOUCHSCREEN_S3C2410
 	tristate "Samsung S3C2410/generic touchscreen input driver"
@@ -783,6 +818,19 @@ config TOUCHSCREEN_EDT_FT5X06
 
 	  To compile this driver as a module, choose M here: the
 	  module will be called edt-ft5x06.
+
+config TOUCHSCREEN_FT5X_TS
+	tristate "EDT FocalTech FT5x26 I2C Touchscreen support"
+	depends on I2C
+	help
+	  Say Y here if you have an EDT "Polytouch" touchscreen based
+	  on the FocalTech FT5x26 family of controllers connected to
+	  your system.
+
+	  If unsure, say N.
+
+	  To compile this driver as a module, choose M here: the
+	  module will be called edt-ft5x26.
 
 config TOUCHSCREEN_MIGOR
 	tristate "Renesas MIGO-R touchscreen"

@@ -89,3 +89,7 @@ obj-$(CONFIG_LEDS_USER)			+= uleds.o
 
 # LED Triggers
 obj-$(CONFIG_LEDS_TRIGGERS)		+= trigger/
+
+obj-$(CONFIG_LEDS_ELC_TWO)		+=wa-two-leds.o
+
+obj-$(CONFIG_LEDS_ELC_FOUR)		+=wa-four-leds.o

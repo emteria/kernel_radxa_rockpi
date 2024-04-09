@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: GPL-2.0 */
 /*
  * DHD Linux header file - contains private structure definition of the Linux specific layer
  *

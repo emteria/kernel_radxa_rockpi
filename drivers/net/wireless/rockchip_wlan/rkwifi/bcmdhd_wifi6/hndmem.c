@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: GPL-2.0 */
 /*
  * Utility routines for configuring different memories in Broadcom chips.
  *

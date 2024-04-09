@@ -15,6 +15,7 @@
 #include <linux/of_device.h>
 #include <linux/pm_runtime.h>
 #include <linux/regmap.h>
+#include <linux/gpio/consumer.h>
 #include <linux/reset.h>
 #include <linux/mfd/syscon.h>
 #include <linux/phy/phy.h>
@@ -281,6 +282,8 @@ struct dw_mipi_dsi {
 	int irq;
 	int id;
 
+	struct gpio_desc *reset_gpio;//rocky
+	struct gpio_desc *enable_gpio;//rocky
 	/* dual-channel */
 	struct dw_mipi_dsi *master;
 	struct dw_mipi_dsi *slave;
@@ -526,6 +529,32 @@ static inline void mipi_dphy_rstz_deassert(struct dw_mipi_dsi *dsi)
 	udelay(1);
 }
 
+static void dsi_external_bradge_power_on(struct dw_mipi_dsi *dsi)
+{
+    if (dsi->enable_gpio) {
+        gpiod_direction_output(dsi->enable_gpio, 1);
+        usleep_range(1000, 2000);
+        }
+    if (dsi->reset_gpio) {
+        gpiod_direction_output(dsi->reset_gpio, 1);
+        usleep_range(1000, 2000);
+        gpiod_direction_output(dsi->reset_gpio, 0);
+        usleep_range(1000, 2000);
+        gpiod_direction_output(dsi->reset_gpio, 1);
+        usleep_range(1000, 2000);
+        }
+}
+static void dsi_external_bradge_power_down(struct dw_mipi_dsi *dsi)
+{
+    if (dsi->reset_gpio) {
+        gpiod_direction_output(dsi->reset_gpio, 0);
+        usleep_range(1000, 2000);
+        }
+	if (dsi->enable_gpio) {
+        gpiod_direction_output(dsi->enable_gpio, 0);
+        usleep_range(1000, 2000);
+        }
+}
 static void dw_mipi_dsi_phy_init(struct dw_mipi_dsi *dsi)
 {
 	struct mipi_dphy *dphy = &dsi->dphy;
@@ -833,6 +862,8 @@ static ssize_t dw_mipi_dsi_transfer(struct dw_mipi_dsi *dsi,
 	if (msg->flags & MIPI_DSI_MSG_USE_LPM) {
 		regmap_update_bits(dsi->regmap, DSI_VID_MODE_CFG,
 				   LP_CMD_EN, LP_CMD_EN);
+		regmap_update_bits(dsi->regmap, DSI_LPCLK_CTRL,
+				   PHY_TXREQUESTCLKHS, PHY_TXREQUESTCLKHS);
 	} else {
 		regmap_update_bits(dsi->regmap, DSI_VID_MODE_CFG, LP_CMD_EN, 0);
 		regmap_update_bits(dsi->regmap, DSI_LPCLK_CTRL,
@@ -1078,6 +1109,7 @@ static void dw_mipi_dsi_disable(struct dw_mipi_dsi *dsi)
 
 static void dw_mipi_dsi_post_disable(struct dw_mipi_dsi *dsi)
 {
+	dsi_external_bradge_power_down(dsi);//rocky
 	regmap_write(dsi->regmap, DSI_INT_MSK0, 0);
 	regmap_write(dsi->regmap, DSI_INT_MSK1, 0);
 	regmap_write(dsi->regmap, DSI_PWR_UP, RESET);
@@ -1259,6 +1291,7 @@ static void dw_mipi_dsi_pre_enable(struct dw_mipi_dsi *dsi)
 
 	regmap_write(dsi->regmap, DSI_INT_MSK0, 0x1fffff);
 	regmap_write(dsi->regmap, DSI_INT_MSK1, 0x1f7f);
+	dsi_external_bradge_power_on(dsi);//rocky
 
 	if (dsi->slave)
 		dw_mipi_dsi_pre_enable(dsi->slave);
@@ -1718,6 +1751,28 @@ static irqreturn_t dw_mipi_dsi_irq_handler(int irq, void *dev_id)
 	return IRQ_HANDLED;
 }
 
+static int dw_mipi_dsi_parse_dt(struct dw_mipi_dsi *dsi)
+{
+	struct device *dev = dsi->dev;
+	struct device_node *np = dev->of_node;
+	struct device_node *endpoint, *remote = NULL;
+
+	endpoint = of_graph_get_endpoint_by_regs(np, 1, -1);
+	if (endpoint) {
+		remote = of_graph_get_remote_port_parent(endpoint);
+		of_node_put(endpoint);
+		if (!remote) {
+			dev_err(dev, "no panel/bridge connected\n");
+			return -ENODEV;
+		}
+		of_node_put(remote);
+	}
+
+	dsi->client = remote;
+
+	return 0;
+}
+
 static const struct regmap_config dw_mipi_dsi_regmap_config = {
 	.name = "host",
 	.reg_bits = 32,
@@ -1748,6 +1803,24 @@ static int dw_mipi_dsi_probe(struct platform_device *pdev)
 	dsi->id = id;
 	dsi->pdata = of_device_get_match_data(dev);
 	platform_set_drvdata(pdev, dsi);
+
+    dsi->enable_gpio = devm_gpiod_get_optional(dev, "enable", 0);
+    if (IS_ERR(dsi->enable_gpio)) {
+        ret = PTR_ERR(dsi->enable_gpio);
+        dev_err(dev, "failed to request enable GPIO: %d\n", ret);
+        return ret;
+        }
+    dsi->reset_gpio = devm_gpiod_get_optional(dev, "reset", 0);
+    if (IS_ERR(dsi->reset_gpio)) {
+        ret = PTR_ERR(dsi->reset_gpio);
+        dev_err(dev, "failed to request reset GPIO: %d\n", ret);
+        return ret;
+        }
+	ret = dw_mipi_dsi_parse_dt(dsi);
+	if (ret) {
+		dev_err(dev, "failed to parse DT\n");
+		return ret;
+	}
 
 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
 	regs = devm_ioremap_resource(dev, res);

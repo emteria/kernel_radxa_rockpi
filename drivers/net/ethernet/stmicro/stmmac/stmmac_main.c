@@ -54,6 +54,7 @@
 #include "dwmac1000.h"
 #include "dwxgmac2.h"
 #include "hwif.h"
+#include <linux/soc/rockchip/rk_vendor_storage.h>//add by qwang for write mac address 2021.08.24
 
 #define	STMMAC_ALIGN(x)		ALIGN(ALIGN(x, SMP_CACHE_BYTES), 16)
 #define	TSO_MAX_BUFF_SIZE	(SZ_16K - 1)
@@ -2154,6 +2155,26 @@ static int stmmac_get_hw_features(struct stmmac_priv *priv)
  */
 static void stmmac_check_ether_addr(struct stmmac_priv *priv)
 {
+	// start add by qwang for write mac address 2021.08.24
+	int ret = 0;
+	int count = 5;
+	printk("qwang %s:%d dev_addr %pM\n",__func__,__LINE__,priv->dev->dev_addr);
+	while (count-- > 0) {
+	    if (is_rk_vendor_ready())
+	        break;
+	    /* sleep 500ms wait rk vendor driver ready */
+	    msleep(500);
+	}
+	ret = rk_vendor_read(LAN_MAC_ID, priv->dev->dev_addr, ETH_ALEN);
+	printk("qwang %s:%d dev_addr %pM\n",__func__,__LINE__, priv->dev->dev_addr);
+	if (ret != 6 || is_zero_ether_addr(priv->dev->dev_addr)) {
+	    printk("qwang %s: rk_vendor_read eth mac address failed (%d)\n",__func__, ret);
+	    random_ether_addr(priv->dev->dev_addr);
+	    printk("qwang %s:%d dev_addr %pM\n",__func__,__LINE__,priv->dev->dev_addr);
+	    ret = rk_vendor_write(LAN_MAC_ID, priv->dev->dev_addr, ETH_ALEN);
+	    if (ret != 0)
+	        printk("qwang %s: rk_vendor_write eth mac address failed (%d)\n",__func__, ret);
+	}//end add by qwang for write mac address 2021.08.24
 	if (!is_valid_ether_addr(priv->dev->dev_addr)) {
 		stmmac_get_umac_addr(priv, priv->hw, priv->dev->dev_addr, 0);
 		if (likely(priv->plat->get_eth_addr))
@@ -2639,6 +2660,8 @@ static int stmmac_open(struct net_device *dev)
 			   __func__);
 		goto init_error;
 	}
+
+	stmmac_check_ether_addr(priv);//add by qwang for write mac address 2021.08.24
 
 	ret = stmmac_hw_setup(dev, true);
 	if (ret < 0) {
@@ -4340,7 +4363,7 @@ int stmmac_dvr_probe(struct device *device,
 	if (ret)
 		goto error_hw_init;
 
-	stmmac_check_ether_addr(priv);
+	//stmmac_check_ether_addr(priv);//add by qwang for write mac address 2021.08.24
 
 	/* Configure real RX and TX queues */
 	netif_set_real_num_rx_queues(ndev, priv->plat->rx_queues_to_use);

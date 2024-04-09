@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: GPL-2.0 */
 /*
  * Broadcom SPI Host Controller Driver - Linux Per-port
  *

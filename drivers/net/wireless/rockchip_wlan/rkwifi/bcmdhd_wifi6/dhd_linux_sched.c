@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: GPL-2.0 */
 /*
  * Expose some of the kernel scheduler routines
  *
@@ -35,11 +36,7 @@
 int setScheduler(struct task_struct *p, int policy, struct sched_param *param)
 {
 	int rc = 0;
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 9, 0))
-	sched_set_fifo_low(p);
-#else
 	rc = sched_setscheduler(p, policy, param);
-#endif
 	return rc;
 }
 

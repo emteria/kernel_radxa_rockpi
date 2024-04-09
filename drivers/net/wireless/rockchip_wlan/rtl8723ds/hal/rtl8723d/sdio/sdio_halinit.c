@@ -1,4 +1,3 @@
-/* SPDX-License-Identifier: GPL-2.0 */
 /******************************************************************************
  *
  * Copyright(c) 2007 - 2017 Realtek Corporation.
@@ -448,6 +447,7 @@ void _InitWMACSetting(PADAPTER padapter)
 		| RCR_CBSSID_DATA | RCR_CBSSID_BCN | RCR_AMF
 		| RCR_HTC_LOC_CTRL
 		| RCR_APP_PHYST_RXFF | RCR_APP_ICV | RCR_APP_MIC
+		| RCR_APPFCS
 		#ifdef CONFIG_MAC_LOOPBACK_DRIVER
 		| RCR_AAP
 		| RCR_ADD3 | RCR_APWRMGT | RCR_ACRC32 | RCR_ADF
@@ -1743,6 +1743,9 @@ void rtl8723ds_set_hal_ops(PADAPTER padapter)
 
 	pHalFunc->hal_xmit = &rtl8723ds_hal_xmit;
 	pHalFunc->mgnt_xmit = &rtl8723ds_mgnt_xmit;
+#ifdef CONFIG_RTW_MGMT_QUEUE
+	pHalFunc->hal_mgmt_xmitframe_enqueue = &rtl8723ds_hal_mgmt_xmitframe_enqueue;
+#endif
 	pHalFunc->hal_xmitframe_enqueue = &rtl8723ds_hal_xmitframe_enqueue;
 
 #ifdef CONFIG_HOSTAPD_MLME

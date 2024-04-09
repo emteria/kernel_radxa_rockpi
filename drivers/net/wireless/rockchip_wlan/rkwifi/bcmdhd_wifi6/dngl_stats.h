@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: GPL-2.0 */
 /*
  * Common stats definitions for clients of dongle
  * ports
@@ -33,7 +34,6 @@
 
 #include <ethernet.h>
 #include <802.11.h>
-#include <linux/compat.h>
 
 typedef struct {
 	unsigned long	rx_packets;		/* total packets received */

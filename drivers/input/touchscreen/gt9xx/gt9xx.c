@@ -2653,9 +2653,9 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
 
 	if (val == 89) {
 		m89or101 = TRUE;
-		gtp_change_x2y = TRUE;
+		gtp_change_x2y = FALSE;
 		gtp_x_reverse = FALSE;
-		gtp_y_reverse = TRUE;
+		gtp_y_reverse = FALSE;
 	} else if (val == 101) {
 		m89or101 = FALSE;
 		gtp_change_x2y = TRUE;
@@ -2678,7 +2678,7 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
 		bgt9111 = TRUE;
 		gtp_change_x2y = TRUE;
 		gtp_x_reverse = FALSE;
-		gtp_y_reverse = FALSE;
+		gtp_y_reverse = TRUE;//r104
 	} else if (val == 970) {
 		m89or101 = FALSE;
 		bgt911 = FALSE;
@@ -2691,11 +2691,7 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
 		bgt911 = FALSE;
 		bgt970 = FALSE;
 		bgt910 = TRUE;
-		gtp_change_x2y = TRUE;
-		gtp_x_reverse = FALSE;
-		gtp_y_reverse = TRUE;
-	} else if (val == 9271) {
-		gtp_change_x2y = FALSE;
+		gtp_change_x2y = FALSE;//for R95
 		gtp_x_reverse = TRUE;
 		gtp_y_reverse = FALSE;
 	}

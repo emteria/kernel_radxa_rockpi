@@ -406,6 +406,16 @@ static int sensor_get_id(struct i2c_client *client, int *value)
 
 		if (result)
 			return result;
+		printk("%s:id=0x%x\n",__func__,*value);
+		if (*value == 0x03 || *value == 0xfa)//rocky
+			*value = 0xf9;
+		if (*value == 0xf8)
+			*value = 0xf9;
+		if (*value == 0x35)
+			*value = 0x09;
+		printk("Support_bm222\n");
+		printk("Support_bm253\n");
+		printk("Support_kxtj2-1009\n");
 
 		if (*value != sensor->ops->id_data) {
 			dev_err(&client->dev, "%s:id=0x%x is not 0x%x\n", __func__, *value, sensor->ops->id_data);

@@ -661,7 +661,13 @@ try_again:
 	 * to make sure which speed mode should work.
 	 */
 	if (!powered_resume && (rocr & ocr & R4_18V_PRESENT)) {
+#if 0 /* SDIO 3.0 patch for Realtek 88x2BS */
 		err = mmc_set_uhs_voltage(host, ocr_card);
+#else
+		pr_warn("%s: Skip set signal voltage to 1.8v\n",
+				mmc_hostname(host));
+		err = 0;
+#endif
 		if (err == -EAGAIN) {
 			mmc_sdio_resend_if_cond(host, card);
 			retries--;

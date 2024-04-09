@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: GPL-2.0 */
 /*
  * SD-SPI Protocol Conversion - BCMSDH->gSPI Translation Layer
  *

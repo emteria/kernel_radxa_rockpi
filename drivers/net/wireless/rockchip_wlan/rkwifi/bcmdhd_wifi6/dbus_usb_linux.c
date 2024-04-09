@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: GPL-2.0 */
 /*
  * Dongle BUS interface
  * USB Linux Implementation
@@ -74,7 +75,7 @@
 #include <linux/random.h>
 #include <linux/spinlock.h>
 #include <linux/list.h>
-#include <asm/uaccess.h>
+#include <linux/uaccess.h>
 #include <asm/unaligned.h>
 #include <dbus.h>
 #include <bcmutils.h>

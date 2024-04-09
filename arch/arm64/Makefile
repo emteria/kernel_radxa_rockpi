@@ -198,8 +198,10 @@ endif
 
 LOGO := $(notdir $(wildcard $(srctree)/logo.bmp))
 LOGO_KERNEL := $(notdir $(wildcard $(srctree)/logo_kernel.bmp))
+LOGO_ONE := $(notdir $(wildcard $(srctree)/logo_one.bmp))
+LOGO_TWO := $(notdir $(wildcard $(srctree)/logo_two.bmp))
 
-%.img: rockchip/%.dtb kernel.img $(LOGO) $(LOGO_KERNEL)
+%.img: rockchip/%.dtb kernel.img $(LOGO) $(LOGO_KERNEL) $(LOGO_ONE) $(LOGO_TWO)
 	$(Q)$(srctree)/scripts/mkimg --dtb $*.dtb
 
 CLEAN_DIRS += out

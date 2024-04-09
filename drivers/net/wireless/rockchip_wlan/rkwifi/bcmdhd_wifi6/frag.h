@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: GPL-2.0 */
 /*
  * IE/TLV (de)fragmentation declarations/definitions for
  * Broadcom 802.11abgn Networking Device Driver

@@ -1,0 +1,407 @@
+#include <linux/module.h>
+#include <linux/moduleparam.h>
+#include <linux/init.h>
+#include <linux/delay.h>
+#include <linux/pm.h>
+#include <linux/i2c.h>
+#include <linux/platform_device.h>
+#include <linux/slab.h>
+#include <linux/of_gpio.h>
+#include <sound/core.h>
+#include <sound/tlv.h>
+#include <sound/soc.h>
+#include <sound/soc-dapm.h>
+#include <sound/initval.h>
+#include <linux/proc_fs.h>
+#include <linux/gpio.h>
+#include <linux/interrupt.h>
+#include <linux/irq.h>
+#include <linux/miscdevice.h>
+
+#define power_io
+#define SET 0x01
+#define GET 0x02
+
+#define GPIO_ONE 0
+#define GPIO_TWO 1
+#define GPIO_THR 2
+#define GPIO_FOU 3
+#define MIC_EN   4
+
+struct io_control_t{
+	int gpio_one;
+	int gpio_two;
+	int gpio_three;
+	int gpio_four;
+	int mic_en;
+	int gpio_one_flag;
+	int gpio_two_flag;
+	int gpio_three_flag;
+	int gpio_four_flag;
+	int mic_en_flag;
+	struct delayed_work work_delay_wq;
+	struct workqueue_struct *work_wq;
+
+};
+static struct io_control_t *io_control = NULL;
+static long gpio_ioctl(struct file *file, unsigned int cmd, unsigned long arg);
+//extern int vcc_sd_enable(int value);
+static const struct of_device_id of_elc_sensor_match[] = {
+	{ .compatible = "io_control" },
+	{ /* Sentinel */ }
+};
+void zigbee_power_io(bool status)
+{
+	#ifdef power_io
+		 gpio_set_value(io_control->gpio_one,status);
+
+	#else
+		
+//		vcc_sd_enable(status);
+	#endif
+}
+void zigbee_reset_io(bool status)
+{
+
+		gpio_set_value(io_control->gpio_two,status);
+	
+
+}	
+static ssize_t io_control_store(struct device *dev, struct device_attribute *attr,
+			      const char *buf, size_t count)
+{
+	char cmd;
+	
+	sscanf(buf, "%c", &cmd);
+	if (cmd == 'r'){
+		zigbee_power_io(0);
+		zigbee_reset_io(0);
+		msleep(350);
+		zigbee_power_io(1);
+		msleep(50);
+		zigbee_reset_io(1);
+		
+	} else if(cmd == 'h'){
+		zigbee_power_io(true);
+		zigbee_reset_io(true);
+		//gpio_set_value(io_control->gpio_three,true);
+	}else if(cmd == 'l'){
+		zigbee_power_io(false);
+		zigbee_reset_io(false);
+		//gpio_set_value(io_control->gpio_three,false);
+	}
+	else
+		printk("command error \n");
+
+	return count;
+}
+
+static ssize_t io_control_read(struct device *dev, struct device_attribute *attr, char *buf)
+{
+	return sprintf(buf, "power %d , reset %d.\n",gpio_get_value(io_control->gpio_one) ,gpio_get_value(io_control->gpio_two));
+}
+
+static ssize_t mute_led_switch(struct device *dev, struct device_attribute *attr,const  char *buf, size_t count){
+
+	char status;
+	sscanf(buf, "%c", &status);
+	if(status == 'a'){
+		printk("mute open 1\n");
+		gpio_set_value(io_control->gpio_one,true);
+	} else if (status == 'b'){
+		printk("mute close 1\n");
+		gpio_set_value(io_control->gpio_one,false);
+	} else if(status == 'c'){
+		printk("mute open 2\n");
+		gpio_set_value(io_control->gpio_two,true);
+	} else if (status == 'd'){
+		printk("mute close 2\n");
+		gpio_set_value(io_control->gpio_two,false);
+	} else if(status == 'e'){
+		printk("mute open 3\n");
+		gpio_set_value(io_control->gpio_three,true);
+	} else if (status == 'f'){
+		printk("mute close 3\n");
+		gpio_set_value(io_control->gpio_three,false);
+	} else if(status == 'g'){
+		printk("mute open 4\n");
+		gpio_set_value(io_control->gpio_four,true);
+	} else if (status == 'h'){
+		printk("mute close 4\n");
+		gpio_set_value(io_control->gpio_four,false);
+	} else if (status == 'i') {
+		printk("enable mic-en");
+		gpio_set_value(io_control->mic_en,true);
+	} else if (status == 'j') {
+		printk("disable mic-en");
+		gpio_set_value(io_control->mic_en,false);
+	}
+	//mdelay(10);
+	//ret = gpio_get_value(mute_led_gpio);
+	return count;
+}
+static ssize_t mute_led_switch_read(struct device *dev, struct device_attribute *attr, char *buf)
+{
+	return sprintf(buf, "%d\n",gpio_get_value(io_control->gpio_three));
+}
+
+static struct device_attribute io_control_attr[] = {
+	__ATTR(io_control, 0664, io_control_read,io_control_store),
+	__ATTR(mute_switch, 0664, mute_led_switch_read,mute_led_switch),
+};
+
+
+void mute_delay_work_func(struct work_struct *work){
+
+	gpio_set_value(io_control->gpio_three,false);
+}
+
+static struct file_operations io_control_fops = {
+	.owner = THIS_MODULE,
+	.unlocked_ioctl = gpio_ioctl
+};
+
+static struct miscdevice io_control_misc = {
+	.minor = MISC_DYNAMIC_MINOR,
+	.name = "gpio_control",
+	.fops = &io_control_fops
+};
+
+
+int set_gpio(int gpio, bool value){
+
+	if (!gpio_is_valid(gpio)){
+    	printk("set gpio: %d  fail \n",gpio);
+    	return -1;
+    }else{
+		//gpio_direction_output(gpio,value);
+		gpio_set_value(gpio,value);
+	}
+	return 0;
+}
+int get_gpio(int gpio){
+
+	int value;
+	if (!gpio_is_valid(gpio)){
+    	printk("get gpio: %d  fail \n",gpio);
+    	return -1;
+    }else{
+		//gpio_direction_input(gpio);
+		value = gpio_get_value(gpio);
+	}
+	return value;
+}
+/*
+	cmd 31~30 0x01 w  0x10 r
+	    7~0   value
+*/
+
+static long gpio_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+{
+	
+#if 1
+	int gpio,value,ret;
+	char gpio_num;
+	printk("ioctl start \n");
+	if (get_user(gpio_num, (unsigned long __user *)arg)){
+			printk("get gpio num fail \n");
+			return -EFAULT;
+		}
+	printk("%s.....0x%x,%d\n",__FUNCTION__,cmd,gpio_num);
+	switch(gpio_num){
+		case GPIO_ONE:
+			printk("%s.....%d\n",__FUNCTION__,__LINE__);
+			gpio = io_control->gpio_one;
+			break;
+		case GPIO_TWO:
+			printk("%s.....%d\n",__FUNCTION__,__LINE__);
+			gpio = io_control->gpio_two;
+			break;
+		case GPIO_THR:
+			printk("%s.....%d\n",__FUNCTION__,__LINE__);
+			gpio = io_control->gpio_three;
+			break;
+		case GPIO_FOU:
+			printk("%s.....%d\n",__FUNCTION__,__LINE__);
+			gpio = io_control->gpio_four;
+			break;
+        case MIC_EN:
+		    printk("%s.....%d\n",__FUNCTION__,__LINE__);
+			gpio = io_control->mic_en;
+		default:break;
+	}
+	value = (cmd & 0x01);
+	cmd = ((cmd >> 30) & 0x03);
+	printk("cmd = 0x%x value = 0x%x\n",cmd,value);
+	if(cmd == SET){
+
+		ret = set_gpio(gpio,value);
+		if(ret < 0)
+			return -1;
+		printk("%s.....%d,value = %d\n",__FUNCTION__,__LINE__,value);
+		value = get_gpio(gpio);
+		return value;
+	}else if(cmd == GET){
+		value = get_gpio(gpio);
+		printk("%s.....%d\n",__FUNCTION__,__LINE__);
+		return value;
+	}else{
+		printk(" cmd fail \n");
+	}
+
+#endif
+
+	return 0;
+}
+
+
+static int io_control_probe(struct platform_device *pdev)
+{
+	enum of_gpio_flags flags;
+    struct device_node *sensor_node = pdev->dev.of_node;
+    int ret;
+	printk("----------start----------------\n");
+    io_control = kzalloc(sizeof(struct io_control_t), GFP_KERNEL);
+    if (!io_control)
+    {
+		printk("zigbee kzalloc fail");
+        goto failed;
+    }
+
+    io_control->gpio_one = of_get_named_gpio(sensor_node,"gpio-one", 0);
+    if (!gpio_is_valid(io_control->gpio_one)){
+    	printk("zigbee-en-gpio: %d  fail \n",io_control->gpio_one);
+    }else{
+		io_control->gpio_one_flag = (flags & OF_GPIO_ACTIVE_LOW)? 1:0;
+		if( devm_gpio_request_one(&pdev->dev, io_control->gpio_one,GPIOF_DIR_OUT, "gpio_one") < 0 ){
+
+    		printk("gpio_one request fail\n");
+    		gpio_free(io_control->gpio_one);
+    		goto failed;
+		}
+	}
+	//set_gpio(io_control->gpio_one, 1);
+	io_control->gpio_two = of_get_named_gpio(sensor_node,"gpio-two", 0);
+    if (!gpio_is_valid(io_control->gpio_two)){
+    	printk("gpio_two: %d  fail \n",io_control->gpio_two);
+    	
+    }else{
+		io_control->gpio_two_flag = (flags & OF_GPIO_ACTIVE_LOW)? 0:1;
+
+		if ( devm_gpio_request_one(&pdev->dev, io_control->gpio_two,GPIOF_DIR_OUT, "gpio_two") < 0 ){
+    		printk("gpio_two request fail\n");
+    		gpio_free(io_control->gpio_two);
+    		goto failed;
+		}
+	}
+
+    io_control->gpio_three = of_get_named_gpio(sensor_node,"gpio-three", 0);
+    if (!gpio_is_valid(io_control->gpio_three)){
+
+    	printk("gpio_three: %d  fail \n",io_control->gpio_three);
+    	//return -1;
+    }else{
+    	io_control->gpio_four_flag = (flags & OF_GPIO_ACTIVE_LOW)? 0:1;
+    	if ( devm_gpio_request_one(&pdev->dev, io_control->gpio_three, GPIOF_DIR_OUT, "gpio_three") < 0 ){
+
+			printk("gpio_three request fail\n");
+    		gpio_free(io_control->gpio_three);
+    		goto failed;	
+    	}
+	}
+  
+    io_control->gpio_four = of_get_named_gpio(sensor_node,"gpio-four", 0);
+    if (!gpio_is_valid(io_control->gpio_four)){
+
+    	printk("gpio_four: %d  fail \n",io_control->gpio_four);
+    	//return -1;
+    }else{
+    	io_control->gpio_four_flag = (flags & OF_GPIO_ACTIVE_LOW)? 0:1;
+    	if ( devm_gpio_request_one(&pdev->dev, io_control->gpio_four, GPIOF_DIR_OUT, "gpio_four") < 0 ){
+
+			printk("gpio_four request fail\n");
+    		gpio_free(io_control->gpio_four);
+    		goto failed;	
+    	}
+	}
+	
+	io_control->mic_en = of_get_named_gpio(sensor_node,"mic-en-gpio", 0);
+    if (!gpio_is_valid(io_control->mic_en)){
+
+    	printk("mic_en: %d  fail \n",io_control->mic_en);
+    	//return -1;
+    }else{
+    	io_control->mic_en_flag = (flags & OF_GPIO_ACTIVE_LOW)? 0:1;
+    	if ( devm_gpio_request_one(&pdev->dev, io_control->mic_en, GPIOF_DIR_OUT, "mic_en") < 0 ){
+
+			printk("mic_en request fail\n");
+    		gpio_free(io_control->mic_en);
+    		goto failed;	
+    	}
+	}
+
+	if (sysfs_create_file(&pdev->dev.kobj,&io_control_attr[0].attr))
+			printk("gpio sysfs_create_file fail\n");
+
+	if (sysfs_create_file(&pdev->dev.kobj,&io_control_attr[1].attr))
+			printk("gpio sysfs_create_file fail\n");
+
+	ret = misc_register(&io_control_misc);
+	if (ret < 0) {
+		printk("%s: could not register misc device io_control\n", __FUNCTION__);
+	}
+
+
+/*	io_control->work_wq	= create_workqueue("test_wq");
+	if(!io_control->work_wq){
+		printk("work_wq \n");
+		return -1;
+	}
+	INIT_DELAYED_WORK(&io_control->work_delay_wq, mute_delay_work_func);
+	queue_delayed_work(io_control->work_wq, &io_control->work_delay_wq, msecs_to_jiffies(6666));*/
+	printk("----------end----------------\n");
+	return 0;
+failed:
+    return -1;
+}
+
+static int io_control_remove(struct platform_device *pdev)
+{	
+	if(io_control->gpio_two != 0)
+		gpio_free(io_control->gpio_two);
+#ifdef power_io	
+	if(io_control->gpio_one != 0)
+		gpio_free(io_control->gpio_one);
+#endif
+    return 0;
+}
+static struct platform_driver io_control_driver = {
+	.probe		= io_control_probe,
+	.remove		= io_control_remove,
+	.driver		= {
+	.name	= "io_control",
+	.owner	= THIS_MODULE,
+	.of_match_table	= of_elc_sensor_match,
+	},
+
+};
+
+
+static int __init io_control_init(void)
+{
+    printk(KERN_INFO "Enter hyman %s\n", __FUNCTION__);
+    return platform_driver_register(&io_control_driver);
+}
+
+static void __exit io_control_exit(void)
+{
+    printk(KERN_INFO "Enter %s\n", __FUNCTION__);	
+    platform_driver_unregister(&io_control_driver);
+}
+
+subsys_initcall(io_control_init);
+module_exit(io_control_exit);
+
+MODULE_DESCRIPTION("io_control sensor driver");
+MODULE_LICENSE("GPL");
+MODULE_ALIAS("platform:io_control");

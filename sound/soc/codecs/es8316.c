@@ -44,10 +44,13 @@ struct es8316_priv {
 	struct clk *mclk;
 
 	struct gpio_desc *gpiod_spk_ctl;
+	struct gpio_desc *gpiod_hp_ctl;//rocky
 	bool muted;
 	bool hp_inserted;
 	struct notifier_block extcon_nb;
 	int pwr_count;
+
+	unsigned int spk_volume;
 };
 
 /*
@@ -68,8 +71,13 @@ static const SNDRV_CTL_TLVD_DECLARE_DB_RANGE(adc_pga_gain_tlv,
 	1, 1, TLV_DB_SCALE_ITEM(0, 0, 0),
 	2, 2, TLV_DB_SCALE_ITEM(250, 0, 0),
 	3, 3, TLV_DB_SCALE_ITEM(450, 0, 0),
-	4, 7, TLV_DB_SCALE_ITEM(700, 300, 0),
-	8, 10, TLV_DB_SCALE_ITEM(1800, 300, 0),
+	4, 4, TLV_DB_SCALE_ITEM(700, 0, 0),
+	5, 5, TLV_DB_SCALE_ITEM(1000, 0, 0),//add by rocky
+	6, 6, TLV_DB_SCALE_ITEM(1300, 0, 0),
+	7, 7, TLV_DB_SCALE_ITEM(1600, 0, 0),
+	8, 8, TLV_DB_SCALE_ITEM(1800, 0, 0),
+	9, 9, TLV_DB_SCALE_ITEM(2100, 0, 0),
+	10, 10, TLV_DB_SCALE_ITEM(2400, 0, 0),
 );
 
 static const SNDRV_CTL_TLVD_DECLARE_DB_RANGE(hpout_vol_tlv,
@@ -508,6 +516,13 @@ static void es8316_enable_spk(struct es8316_priv *es8316, bool enable)
 	gpiod_set_value(es8316->gpiod_spk_ctl, enable);
 }
 
+static void es8316_enable_hp(struct es8316_priv *es8316, bool enable)
+{
+	if (!es8316 || !es8316->gpiod_hp_ctl)
+		return;
+	gpiod_set_value(es8316->gpiod_hp_ctl, enable);
+}
+
 static int es8316_extcon_notifier(struct notifier_block *self, unsigned long event, void *ptr)
 {
 	struct es8316_priv *es8316 = container_of(self, struct es8316_priv,
@@ -515,9 +530,14 @@ static int es8316_extcon_notifier(struct notifier_block *self, unsigned long eve
 
 	if (event) {
 		es8316->hp_inserted = true;
-		es8316_enable_spk(es8316, false);
+		//es8316_enable_spk(es8316, false);
+		//es8316_enable_hp(es8316, true);
+		//printk("######rocky####### %s--%d\n",__func__,__LINE__);
 	} else {
 		es8316->hp_inserted = false;
+		//es8316_enable_hp(es8316, false);
+		//es8316_enable_spk(es8316, true);
+		//printk("######rocky####### %s--%d\n",__func__,__LINE__);
 	}
 	return NOTIFY_DONE;
 }
@@ -531,13 +551,26 @@ static int es8316_mute(struct snd_soc_dai *dai, int mute)
 	es8316->muted = mute;
 	if (mute) {
 		es8316_enable_spk(es8316, false);
+		es8316_enable_spk(es8316, false);
+		//printk("######rocky####### %s--%d\n",__func__,__LINE__);
 		msleep(100);
 		snd_soc_component_update_bits(dai->component, ES8316_DAC_SET1, 0x20, val);
-	} else {
+	} else if (dai->playback_active) {
 		snd_soc_component_update_bits(dai->component, ES8316_DAC_SET1, 0x20, val);
-		msleep(130);
-		if (!es8316->hp_inserted)
+		msleep(200);
+		if(es8316->hp_inserted == 1 )
+		{
+			es8316_enable_spk(es8316, false);
+			es8316_enable_hp(es8316, true);
+			//printk("######rocky####### %s--%d\n",__func__,__LINE__);
+		}
+		else
+		{
+			es8316_enable_hp(es8316, false);
 			es8316_enable_spk(es8316, true);
+			//printk("######rocky####### %s--%d\n",__func__,__LINE__);
+		}
+			
 	}
 	return 0;
 }
@@ -622,6 +655,8 @@ static int es8316_probe(struct snd_soc_component *component)
 	usleep_range(5000, 5500);
 	snd_soc_component_write(component, ES8316_RESET, ES8316_RESET_CSM_ON);
 	msleep(30);
+	snd_soc_component_write(component, ES8316_SYS_PDN, 0x00);
+	snd_soc_component_write(component, ES8316_HPMIX_VOL, es8316->spk_volume);
 
 	/*
 	 * Documentation is unclear, but this value from the vendor driver is
@@ -695,6 +730,25 @@ static int es8316_i2c_probe(struct i2c_client *i2c_client,
 		es8316->gpiod_spk_ctl = NULL;
 		dev_warn(&i2c_client->dev, "cannot get spk-con-gpio %d\n", ret);
 	}
+	
+	es8316->gpiod_hp_ctl = devm_gpiod_get_optional(&i2c_client->dev,
+							"hp-con",
+							GPIOD_OUT_LOW);
+							
+	if (IS_ERR(es8316->gpiod_hp_ctl)) {
+		ret = IS_ERR(es8316->gpiod_hp_ctl);
+		es8316->gpiod_hp_ctl = NULL;
+		dev_warn(&i2c_client->dev, "cannot get hp-con-gpio %d\n", ret);
+	}
+	
+
+	ret = of_property_read_u32(i2c_client->dev.of_node, "spk_volume",
+				   &es8316->spk_volume);
+	if (ret < 0) {
+		dev_warn(&i2c_client->dev, "%s() Can not read property spk_volume, default 0x88\n",__func__);
+		es8316->spk_volume = 0x88;
+	}
+
 	if (device_property_read_bool(&i2c_client->dev, "extcon")) {
 		edev = extcon_get_edev_by_phandle(&i2c_client->dev, 0);
 		if (IS_ERR(edev)) {

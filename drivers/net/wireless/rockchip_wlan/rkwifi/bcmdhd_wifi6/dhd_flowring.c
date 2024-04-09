@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: GPL-2.0 */
 /*
  * @file Broadcom Dongle Host Driver (DHD), Flow ring specific code at top level
  *
@@ -49,7 +50,6 @@
 #include <pcie_core.h>
 #include <bcmmsgbuf.h>
 #include <dhd_pcie.h>
-#include <dhd_config.h>
 
 static INLINE int dhd_flow_queue_throttle(flow_queue_t *queue);
 
@@ -361,7 +361,7 @@ dhd_flow_rings_init(dhd_pub_t *dhdp, uint32 num_flow_rings)
 
 		/* Initialize the per flow ring backup queue */
 		dhd_flow_queue_init(dhdp, &flow_ring_table[idx].queue,
-		                    dhdp->conf->flow_ring_queue_threshold);
+		                    FLOW_RING_QUEUE_THRESHOLD);
 	}
 
 	/* Allocate per interface hash table (for fast lookup from interface to flow ring) */

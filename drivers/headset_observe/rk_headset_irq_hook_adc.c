@@ -364,9 +364,9 @@ static void hook_work_callback(struct work_struct *work)
 		printk("headset is out, HOOK status must discard\n");
 		goto out;
 	} else {
-		input_report_key(headset->input_dev,
+	/*	input_report_key(headset->input_dev,
 				 HOOK_KEY_CODE, headset->hook_status);
-		input_sync(headset->input_dev);
+		input_sync(headset->input_dev);*/ //delete by rocky
 	}
 status_error:
 	schedule_delayed_work(&headset_info->hook_work, msecs_to_jiffies(100));

@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: GPL-2.0 */
 /*
  * Fundamental types and constants relating to FILS AUTHENTICATION
  * Copyright (C) 1999-2019, Broadcom.

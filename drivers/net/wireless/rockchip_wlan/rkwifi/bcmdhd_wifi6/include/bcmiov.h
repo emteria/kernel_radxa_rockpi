@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: GPL-2.0 */
 /*
  * bcmiov.h
  * Common iovar handling/parsing support - batching, parsing, sub-cmd dispatch etc.

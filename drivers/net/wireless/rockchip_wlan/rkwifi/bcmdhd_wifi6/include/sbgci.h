@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: GPL-2.0 */
 /*
  * SiliconBackplane GCI core hardware definitions
  *

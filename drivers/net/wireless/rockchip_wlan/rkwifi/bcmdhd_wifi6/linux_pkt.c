@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: GPL-2.0 */
 /*
  * Linux Packet (skb) interface
  *
@@ -309,7 +310,7 @@ linux_pktfree(osl_t *osh, void *p, bool send)
 #endif /* BCM_OBJECT_TRACE */
 
 		{
-			if (skb->destructor || irqs_disabled()) {
+			if (skb->destructor) {
 				/* cannot kfree_skb() on hard IRQ (net/core/skbuff.c) if
 				 * destructor exists
 				 */

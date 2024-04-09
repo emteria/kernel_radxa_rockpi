@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: GPL-2.0 */
 /*
  * IE/TLV fragmentation/defragmentation support for
  * Broadcom 802.11bang Networking Device Driver

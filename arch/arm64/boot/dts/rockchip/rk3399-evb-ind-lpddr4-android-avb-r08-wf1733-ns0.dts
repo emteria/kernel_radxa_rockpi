@@ -1,0 +1,238 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright (c) 2019 Fuzhou Rockchip Electronics Co., Ltd
+ */
+
+/dts-v1/;
+
+#include "rk3399-evb-ind-r08.dtsi"
+#include "rk3399-android.dtsi"
+
+/ {
+	model = "Rockchip RK3399 EVB IND LPDDR4 Board edp (Android)";
+	compatible = "rockchip,android", "rockchip,rk3399-evb-ind-lpddr4-android-r08", "rockchip,rk3399";
+	chosen: chosen {
+		bootargs = "earlycon=uart8250,mmio32,0xff1a0000 console=ttyFIQ0 androidboot.baseband=N/A androidboot.veritymode=enforcing androidboot.hardware=rk30board androidboot.console=ttyFIQ0 init=/init initrd=0x62000001,0x00800000 coherent_pool=1m";
+	};
+
+	iram: sram@ff8d0000 {
+		compatible = "mmio-sram";
+		reg = <0x0 0xff8d0000 0x0 0x20000>;
+	};
+
+	vcc_lcd: vcc-lcd {
+		compatible = "regulator-fixed";
+		regulator-name = "vcc_lcd";
+		startup-delay-us = <20000>;
+		enable-active-high;
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		regulator-boot-on;
+		vin-supply = <&vcc_sys>;
+	};
+
+	panel: panel {
+		compatible = "simple-panel";
+		backlight = <&backlight>;
+		power-supply = <&vcc3v3_s0>;
+		enable-gpios = <&gpio1 3 GPIO_ACTIVE_HIGH>;
+		pinctrl-names = "default"; 
+		pinctrl-0 = <&lcd_en>; 
+	
+		//WF1413 panel
+		//prepare-delay-ms = <20>;
+		//reset-delay-ms = <20>;
+		//enable-delay-ms = <20>;
+		
+		//WF1713 panel
+		reset-delay-ms = <60>;
+		enable-delay-ms = <60>;
+		prepare-delay-ms = <60>;
+		unprepare-delay-ms = <60>;
+		disable-delay-ms = <60>;
+		
+		bpc = <8>; //rocky
+		bus-format = <MEDIA_BUS_FMT_RGB888_1X24>;//rocky
+		//bpc = <6>;
+		//bus-format = <MEDIA_BUS_FMT_RGB666_1X18>;//R156X40-196-1201
+		
+		display-timings {
+			native-mode = <&timing0>;
+
+			timing0: timing0 {
+				clock-frequency = <138500000>;
+				hactive = <1920>;
+				vactive = <1080>;
+				hfront-porch = <134>;
+				hsync-len = <26>;
+				hback-porch = <24>;
+				vfront-porch = <16>;
+				vsync-len = <6>;
+				vback-porch = <14>;
+				hsync-active = <0>;
+				vsync-active = <0>;
+				de-active = <0>;
+				pixelclk-active = <0>;
+			};
+		};
+
+		ports {
+			panel_in: endpoint {
+				remote-endpoint = <&edp_out>;
+			};
+		};
+	};
+
+	test-power {
+		status = "okay";
+	};
+};
+
+&backlight {
+	enable-gpios = <&gpio1 10 GPIO_ACTIVE_LOW>;
+	pinctrl-names = "default"; 
+	pinctrl-0 = <&bl_en>; 
+};
+
+&dmac_bus {
+	iram = <&iram>;
+	rockchip,force-iram;
+};
+
+&dp_sound {
+	status = "disabled";
+};
+
+&edp {
+	status = "okay";
+	force-hpd;
+
+	ports {
+		port@1 {
+			reg = <1>;
+
+			edp_out: endpoint {
+				remote-endpoint = <&panel_in>;
+			};
+		};
+	};
+};
+
+&i2c1 {
+	status = "okay";
+
+	gc2155: gc2155@3c {
+		status = "okay";
+		compatible = "galaxycore,gc2155";
+		
+		reg = <0x3c>;
+
+		clocks = <&cru SCLK_CIF_OUT>;
+		clock-names = "xvclk";
+
+		//avdd-supply = <&vcc2v8_dvp>;
+		dovdd-supply = <&vcc1v8_dvp>;
+		dvdd-supply = <&vcc1v8_dvp>;
+
+		pwdn-gpios = <&gpio2 28 GPIO_ACTIVE_HIGH>;
+		rockchip,camera-module-index = <1>;
+		rockchip,camera-module-facing = "front";		//"front";
+		rockchip,camera-module-name = "CameraKing";
+		rockchip,camera-module-lens-name = "Largan";
+
+		pinctrl-names = "rockchip,camera_default";
+		pinctrl-0 = <&cif_clkout>;		
+
+		port {			
+			gc2155_out: endpoint {
+				remote-endpoint = <&dvp_in_fcam>;
+			};
+		};
+	};
+};
+
+&rkisp1_1 {
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&cif_clkout &isp_dvp_d0d7>;
+
+	port {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		dvp_in_fcam: endpoint@0 {
+			reg = <0>;
+			remote-endpoint = <&gc2155_out>;
+		};
+	};
+};
+
+&i2s2 {
+	#sound-dai-cells = <0>;
+	status = "okay";
+};
+
+&hdmi_sound {
+	status = "okay";
+};
+
+&edp_in_vopb {
+	status = "okay";
+};
+
+&edp_in_vopl {
+	status = "disabled";
+};
+
+&route_edp {
+	connect = <&vopb_out_edp>;
+	status = "okay";
+};
+
+&hdmi_in_vopb {
+	status = "disabled";
+};
+
+&route_hdmi {
+	status = "okay";
+	connect = <&vopl_out_hdmi>;
+};
+
+&i2s1 {
+	#sound-dai-cells = <0>;
+	status = "okay";
+};
+
+&es8316_sound {
+	status = "okay";
+};
+
+/*
+ * if enable dp_sound, should disable spdif_sound and spdif_out
+ */
+&spdif_out {
+	status = "disabled";
+};
+
+&spdif_sound {
+	status = "disabled";
+};
+
+&i2s0 {
+	#sound-dai-cells = <0>;
+	status = "okay";
+};
+
+&pinctrl {
+	lcd-panel {
+		/*lcd_panel_reset: lcd-panel-reset {
+			rockchip,pins = <1 RK_PC7 RK_FUNC_GPIO &pcfg_pull_up>;
+		};*/
+		lcd_en: lcd-en {
+			rockchip,pins = <1 3 RK_FUNC_GPIO &pcfg_pull_up>;
+		};
+		bl_en: bl-en {
+			rockchip,pins = <1 10 RK_FUNC_GPIO &pcfg_pull_up>;
+		};
+	};
+};
+
