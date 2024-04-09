@@ -1,4 +1,5 @@
 echo "start patch"
+cd kernel
 cp drivers/media/i2c/ov5648.c_r70 drivers/media/i2c/ov5648.c && \
 cp drivers/rtc/rtc-hym8563.c_r70 drivers/rtc/rtc-hym8563.c && \
 cp kernel/reboot.c_r70 kernel/reboot.c && \
@@ -13,3 +14,4 @@ cp drivers/media/i2c/ov5648.c-nomal drivers/media/i2c/ov5648.c && \
 cp drivers/rtc/rtc-hym8563.c-nomal drivers/rtc/rtc-hym8563.c && \
 cp kernel/reboot.c-nomal kernel/reboot.c && \
 echo "end checkout patch"
+cd -
