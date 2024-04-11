@@ -81,18 +81,22 @@
 
 	es8316_sound: es8316-sound {
 		status = "okay";
-		compatible = "simple-audio-card";
-		simple-audio-card,format = "i2s";
-		simple-audio-card,mclk-fs = <256>;
-		simple-audio-card,name = "rockchip,es8316-codec";
-		simple-audio-card,dai-link@0 {
-			format = "i2s";
-			cpu {
-				sound-dai = <&i2s0_8ch>;
-			};
-			codec {
-				sound-dai = <&es8316>;
-			};
+		compatible = "rockchip,multicodecs-card";
+		rockchip,card-name = "rockchip-es8316";
+		rockchip,format = "i2s";
+		rockchip,mclk-fs = <256>;
+		rockchip,cpu = <&i2s0_8ch>;
+		rockchip,codec = <&es8316>;
+		io-channels = <&saradc 3>;
+		io-channel-names = "adc-detect";
+		keyup-threshold-microvolt = <1800000>;
+		pinctrl-0 = <&hp_det>;
+		pinctrl-names = "default";
+		hp-det-gpio = <&gpio1 RK_PC6 GPIO_ACTIVE_HIGH>;
+		play-pause-key {
+			label = "playpause";
+			linux,code = <164>;
+			press-threshold-microvolt = <2000>;
 		};
 	};
 
@@ -402,8 +406,10 @@
 	es8316: es8316@11 {
 		compatible = "everest,es8316";
 		reg = <0x11>;
-		clocks = <&cru I2S0_8CH_MCLKOUT>;
-		clock-names = "mclk";
+		clocks = <&mclkout_i2s0>;
+        clock-names = "mclk";
+        assigned-clocks = <&mclkout_i2s0>;
+		assigned-clock-rates = <12288000>;
 		pinctrl-names = "default";
 		pinctrl-0 = <&i2s0_mclk>;
 		#sound-dai-cells = <0>;
@@ -536,7 +542,12 @@
 		vcc5v0_otg_en: vcc5v0-otg-en {
 			rockchip,pins = <0 RK_PD4 RK_FUNC_GPIO &pcfg_pull_none>;
 		};
+	};
 
+	headphone {
+		hp_det: hp-det {
+			rockchip,pins = <1 RK_PC6 RK_FUNC_GPIO &pcfg_pull_up>;
+		};
 	};
 };
 
