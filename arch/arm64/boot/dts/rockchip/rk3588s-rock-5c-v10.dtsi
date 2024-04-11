@@ -25,12 +25,18 @@
 	compatible = "radxa,rock-5c", "rockchip,rk3588";
 
 	/delete-node/ chosen;
-
-	fan0: pwm-fan {
+	fan: pwm-fan {
 		compatible = "pwm-fan";
 		#cooling-cells = <2>;
-		cooling-levels = <0 64 128 192 255>;
-		pwms = <&pwm3 0 10000 0>;
+		pwms = <&pwm3 0 50000 0>;
+		cooling-levels = <0 50 100 150 200 255>;
+		rockchip,temp-trips = <
+                50000   1
+                55000   2
+                60000   3
+                65000   4
+                70000   5
+        >;
 	};
 
 	vcc5v0_sys: vcc5v0-sys {
@@ -93,11 +99,14 @@
 		rockchip,card-name = "rockchip-es8316";
 		rockchip,format = "i2s";
 		rockchip,mclk-fs = <256>;
-		rockchip,cpu = <&i2s0_8ch >;
+		rockchip,cpu = <&i2s0_8ch>;
 		rockchip,codec = <&es8316>;
 		io-channels = <&saradc 3>;
 		io-channel-names = "adc-detect";
 		keyup-threshold-microvolt = <1800000>;
+		pinctrl-0 = <&hp_det>;
+		pinctrl-names = "default";
+		hp-det-gpio = <&gpio1 RK_PC6 GPIO_ACTIVE_HIGH>;
 		play-pause-key {
 			label = "playpause";
 			linux,code = <164>;
@@ -423,7 +432,7 @@
 	cap-mmc-highspeed;
 	cap-sd-highspeed;
 	disable-wp;
-	// sd-uhs-sdr104;
+	sd-uhs-sdr104;
 	vmmc-supply = <&vcc_3v3_s0>;
 	vqmmc-supply = <&vccio_sd_s0>;
 	pinctrl-names = "default";
@@ -580,7 +589,9 @@
 };
 
 &usbdrd_dwc3_0 {
-	dr_mode = "host";
+	dr_mode = "otg";
+	extcon = <&u2phy0>;
+	// dr_mode = "host";
 	status = "okay";
 };
 
@@ -618,6 +629,8 @@
 	phy-mode = "rgmii";
 	clock_in_out = "output";
 
+	mac_from_sn = "ok";
+
 	snps,reset-gpio = <&gpio3 RK_PB7 GPIO_ACTIVE_LOW>;
 	snps,reset-active-low;
 	// Reset time is 20ms, 100ms for rtl8211f
@@ -640,12 +653,15 @@
 
 &i2c7 {
 	status = "okay";
+	pinctrl-0 = <&i2c7m0_xfer>;
 
 	es8316: es8316@11 {
 		compatible = "everest,es8316";
 		reg = <0x11>;
-		clocks = <&cru I2S0_8CH_MCLKOUT>;
-		clock-names = "mclk";
+		clocks = <&mclkout_i2s0>;
+        clock-names = "mclk";
+        assigned-clocks = <&mclkout_i2s0>;
+		assigned-clock-rates = <12288000>;
 		pinctrl-names = "default";
 		pinctrl-0 = <&i2s0_mclk>;
 		#sound-dai-cells = <0>;
@@ -787,6 +803,12 @@
 
 		bt_wake_host: bt-wake-host {
 			rockchip,pins = <3 RK_PC0 RK_FUNC_GPIO &pcfg_pull_up>;
+		};
+	};
+
+	headphone {
+		hp_det: hp-det {
+			rockchip,pins = <1 RK_PC6 RK_FUNC_GPIO &pcfg_pull_up>;
 		};
 	};
 };
