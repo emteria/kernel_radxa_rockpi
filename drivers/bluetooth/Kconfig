@@ -431,5 +431,11 @@ config BT_RTKBTUSB
 	help
 	RTK Bluetooth HCI USB driver
 
+config BT_AICBTUSB
+    tristate "AIC HCI USB driver"
+    depends on USB
+    help
+      AIC Bluetooth HCI USB driver
+
 endmenu
 
