@@ -86,7 +86,9 @@
 
 	dsi0_panel: panel@0 {
 		status = "okay";
-		compatible = "radxa,display-8hd";
+			compatible = "radxa,display-8hd";	// rockchip,lane-rate = <480>;
+		// compatible ="radxa,display-10hd-a";	// rockchip,lane-rate = <480>;
+		// compatible ="radxa,display-10hd-N40A";  // rockchip,lane-rate = <1000>;
 		reg = <0>;
 		backlight = <&backlight>;
 
@@ -146,6 +148,7 @@
 	pinctrl-0 = <&i2c5m2_xfer>;
 	clock-frequency = <400000>;
 
+	// dsi0 : compatible = "radxa,display-8hd" tp-size = <9112>; compatible ="radxa,display-10hd-N40A" tp-size = <9271>;
 	gt9xx: gt9xx@14 {
 		status = "okay";
 		compatible = "goodix,gt9xx";
@@ -159,6 +162,19 @@
 		tp-size = <9112>;
 		tp-supply = <&vcc_lcd_mipi0>;
 	};
+
+	//dsi0 : compatible ="radxa,display-10hd-a";
+	// focaltech: focaltech@38 {
+	// 	status = "okay";
+	// 	compatible = "focaltech,fts";
+	// 	reg = <0x38>;
+	// 	pinctrl-names = "default";
+	// 	pinctrl-0 = <&focaltech_gpio>;
+	// 	focaltech,irq-gpio = <&gpio3 RK_PC6 IRQ_TYPE_LEVEL_LOW>;
+	// 	focaltech,reset-gpio = <&gpio3 RK_PC5 GPIO_ACTIVE_HIGH>;
+	// 	focaltech,display-coords = <0 0 799 1279>;
+	// 	tp-supply = <&vcc_lcd_mipi0>;
+	// };
 };
 
 &pinctrl {
@@ -180,4 +196,12 @@
 				<3 RK_PC6 RK_FUNC_GPIO &pcfg_pull_up>;
 		};
 	};
+
+	// focaltech {
+	// 	focaltech_gpio: focaltech-gpio {
+	// 		rockchip,pins =
+	// 			<3 RK_PC5 RK_FUNC_GPIO &pcfg_pull_none>,
+	// 			<3 RK_PC6 RK_FUNC_GPIO &pcfg_pull_up>;
+	// 	};
+	// };
 };
