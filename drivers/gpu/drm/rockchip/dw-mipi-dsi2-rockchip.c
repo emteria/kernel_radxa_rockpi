@@ -813,9 +813,9 @@ static void dw_mipi_dsi2_pre_enable(struct dw_mipi_dsi2 *dsi2)
 	 * initial deskew calibration is send after phy_power_on,
 	 * then we can configure clk_type.
 	 */
-	if (!(dsi2->mode_flags & MIPI_DSI_CLOCK_NON_CONTINUOUS))
-		regmap_update_bits(dsi2->regmap, DSI2_PHY_CLK_CFG,
-				   CLK_TYPE_MASK, CONTIUOUS_CLK);
+	// if (!(dsi2->mode_flags & MIPI_DSI_CLOCK_NON_CONTINUOUS))
+	// 	regmap_update_bits(dsi2->regmap, DSI2_PHY_CLK_CFG,
+	// 			   CLK_TYPE_MASK, CONTIUOUS_CLK);
 
 	regmap_write(dsi2->regmap, DSI2_PWR_UP, POWER_UP);
 	dw_mipi_dsi2_set_cmd_mode(dsi2);
@@ -1472,6 +1472,11 @@ static ssize_t dw_mipi_dsi2_transfer(struct dw_mipi_dsi2 *dsi2,
 	int ret;
 	u32 val;
 	u32 mode;
+
+	if (!(dsi2->mode_flags & MIPI_DSI_CLOCK_NON_CONTINUOUS))
+		regmap_update_bits(dsi2->regmap, DSI2_PHY_CLK_CFG,
+				   CLK_TYPE_MASK, CONTIUOUS_CLK);
+
 
 	regmap_update_bits(dsi2->regmap, DSI2_DSI_VID_TX_CFG,
 			   LPDT_DISPLAY_CMD_EN,
