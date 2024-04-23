@@ -6,6 +6,21 @@
 #include <linux/phy.h>
 #include <linux/of.h>
 
+
+#define RTL_8211E_PHY_ID  0x001cc915
+#define RTL_8211F_PHY_ID  0x001cc916
+#define PHY_ID_YT8010                   0x00000309
+#define PHY_ID_YT8510                   0x00000109
+#define PHY_ID_YT8511                   0x0000010a
+#define PHY_ID_YT8512                   0x00000118
+#define PHY_ID_YT8512B                  0x00000128
+#define PHY_ID_YT8521                   0x0000011a
+#define PHY_ID_YT8531S					0x4f51e91a
+#define PHY_ID_YT8531					0x4f51e91b
+#define PHY_ID_YT8614					0x4F51E899
+#define PHY_ID_YT8618					0x0000e889
+#define PHY_ID_YT8821					0x4f51ea10
+
 /**
  * phy_speed_to_str - Return a string representing the PHY link speed
  *
@@ -350,6 +365,13 @@ void phy_resolve_aneg_pause(struct phy_device *phydev)
 }
 EXPORT_SYMBOL_GPL(phy_resolve_aneg_pause);
 
+
+//#define MII_ADVERTISE		0x04	/* Advertisement control reg   */
+//#define MII_LPA			0x05	/* Link partner ability reg    */
+//#define MII_EXPANSION		0x06	/* Expansion register          */
+//#define MII_CTRL1000		0x09	/* 1000BASE-T control          */
+//#define MII_STAT1000		0x0a	/* 1000BASE-T status           */
+
 /**
  * phy_resolve_aneg_linkmode - resolve the advertisements into PHY settings
  * @phydev: The phy_device struct
@@ -361,7 +383,7 @@ EXPORT_SYMBOL_GPL(phy_resolve_aneg_pause);
 void phy_resolve_aneg_linkmode(struct phy_device *phydev)
 {
 	__ETHTOOL_DECLARE_LINK_MODE_MASK(common);
-	int i;
+	int i,adv;
 
 	linkmode_and(common, phydev->lp_advertising, phydev->advertising);
 
@@ -372,6 +394,18 @@ void phy_resolve_aneg_linkmode(struct phy_device *phydev)
 			break;
 		}
 
+	if(phydev->phy_id == RTL_8211F_PHY_ID) {
+				printk("hcq1 %s phy_id=%x\n",__func__,phydev->phy_id);
+				 adv = phy_read(phydev, MII_CTRL1000);
+				printk("hcq2 %s phy_id=%x adv=%x\n",__func__,phydev->phy_id,adv);
+				if( !adv) {
+					
+					phydev->speed = SPEED_100;
+					phydev->duplex = DUPLEX_FULL;
+					printk("hcq3 %s phydev->speed=%x phydev->duplex=%x\n",__func__,phydev->speed,phydev->duplex);
+				}	
+	}
+	
 	phy_resolve_aneg_pause(phydev);
 }
 EXPORT_SYMBOL_GPL(phy_resolve_aneg_linkmode);
