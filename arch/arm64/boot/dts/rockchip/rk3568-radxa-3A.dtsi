@@ -200,36 +200,6 @@
 		pinctrl-0 = <&vcc5v0_otg_en>;
 	};
 
-	vcc3v3_lcd0_n: vcc3v3-lcd0-n {
-		compatible = "regulator-fixed";
-		regulator-name = "vcc3v3_lcd0_n";
-		regulator-boot-on;
-		regulator-min-microvolt = <3300000>;
-		regulator-max-microvolt = <3300000>;
-		enable-active-high;
-		gpio = <&gpio0 RK_PC7 GPIO_ACTIVE_HIGH>;
-		vin-supply = <&vcc3v3_sys>;
-
-		regulator-state-mem {
-			regulator-off-in-suspend;
-		};
-	};
-
-	vcc3v3_lcd1_n: vcc3v3-lcd1-n {
-		compatible = "regulator-fixed";
-		regulator-name = "vcc3v3_lcd1_n";
-		regulator-boot-on;
-		regulator-min-microvolt = <3300000>;
-		regulator-max-microvolt = <3300000>;
-		enable-active-high;
-		gpio = <&gpio0 RK_PC5 GPIO_ACTIVE_HIGH>;
-		vin-supply = <&vcc3v3_sys>;
-
-		regulator-state-mem {
-			regulator-off-in-suspend;
-		};
-	};
-
 	vcc5v0_usbhub: vcc5v0-usbhub-regulator {
 		compatible = "regulator-fixed";
 		regulator-name = "vcc5v0_usbhub";
@@ -428,6 +398,10 @@
 
 		pwrkey {
 			status = "okay";
+		};
+
+		rk809_rtc: rtc {
+			status = "disabled";
 		};
 
 		pinctrl_rk8xx: pinctrl_rk8xx {
@@ -674,6 +648,10 @@
 		#clock-cells = <0>;
 		clock-frequency = <32768>;
 		clock-output-names = "hym8563";
+		pinctrl-0 = <&rtc_int>;
+
+		interrupt-parent = <&gpio0>;
+		interrupts = <RK_PD3 IRQ_TYPE_LEVEL_LOW>;
 	};
 };
 
@@ -1151,6 +1129,24 @@
 	status = "okay";
 };
 
+&rockchip_suspend {
+	status = "okay";
+	rockchip,sleep-debug-en = <1>;
+	rockchip,sleep-mode-config = <
+		(0
+		| RKPM_SLP_CENTER_OFF
+		| RKPM_SLP_HW_PLLS_OFF
+		| RKPM_SLP_PMUALIVE_32K
+		| RKPM_SLP_32K_PVTM
+		)
+	>;
+	rockchip,wakeup-config = <
+		(0
+		| RKPM_GPIO_WKUP_EN
+		| RKPM_USB_WKUP_EN
+		)
+	>;
+};
 
 &pinctrl {
 
@@ -1221,6 +1217,12 @@
 
 		wifi_led: wifi-led {
 			rockchip,pins = <2 RK_PB0 RK_FUNC_GPIO &pcfg_pull_none>;
+		};
+	};
+
+	rtc {
+		rtc_int: rtc-int {
+			rockchip,pins = <0 RK_PD3 RK_FUNC_GPIO &pcfg_pull_up>;
 		};
 	};
 };
