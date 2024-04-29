@@ -545,6 +545,9 @@ static const struct of_device_id dsi_of_match[] = {
 	}, {
 		.compatible = "raspits,tc358762-5inch",
 		.data = &raspits_tc358762_5inch_bridge
+	}, {
+		.compatible = "waveshare,icn6211-4.3inch",
+		.data = &raspits_tc358762_bridge
    },{
 		/* sentinel */
 	}
