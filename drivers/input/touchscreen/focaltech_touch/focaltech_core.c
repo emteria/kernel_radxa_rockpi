@@ -383,7 +383,8 @@ static int fts_power_source_ctrl(struct fts_ts_data *data, int enable)
     if (enable) {
         if (data->power_disabled) {
             FTS_DEBUG("regulator enable !");
-            gpio_direction_output(fts_data->pdata->reset_gpio, 0);
+            if (gpio_is_valid(fts_data->pdata->reset_gpio))
+                gpio_direction_output(fts_data->pdata->reset_gpio, 0);
             msleep(1);
             ret = regulator_enable(data->vdd);
             if (ret) {
@@ -399,7 +400,8 @@ static int fts_power_source_ctrl(struct fts_ts_data *data, int enable)
     } else {
         if (!data->power_disabled) {
             FTS_DEBUG("regulator disable !");
-            gpio_direction_output(fts_data->pdata->reset_gpio, 0);
+            if (gpio_is_valid(fts_data->pdata->reset_gpio))
+                gpio_direction_output(fts_data->pdata->reset_gpio, 0);
             msleep(1);
             ret = regulator_disable(data->vdd);
             if (ret) {
@@ -1718,7 +1720,7 @@ static const struct i2c_device_id fts_ts_id[] = {
 MODULE_DEVICE_TABLE(i2c, fts_ts_id);
 
 static struct of_device_id fts_match_table[] = {
-    { .compatible = "focaltech,fts", },
+    { .compatible = "focaltech_fts", },
     { },
 };
 

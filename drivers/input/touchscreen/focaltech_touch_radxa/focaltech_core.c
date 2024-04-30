@@ -388,6 +388,8 @@ static int fts_power_source_ctrl(struct fts_ts_data *data, int enable)
 {
     int ret = 0;
 
+    return 0;
+
     FTS_FUNC_ENTER();
     if (enable) {
         if (data->power_disabled) {
@@ -1494,13 +1496,13 @@ static int fts_ts_probe(struct i2c_client *client, const struct i2c_device_id *i
     fts_reset_proc_r(200);
 #endif
 
-/*
+
     ret = fts_get_ic_information(ts_data);
     if (ret) {
         FTS_ERROR("not focal IC, unregister driver");
         goto err_irq_req;
     }
-*/
+
 #if FTS_APK_NODE_EN
     ret = fts_create_apk_debug_channel(ts_data);
     if (ret) {
@@ -1813,7 +1815,7 @@ static const struct i2c_device_id fts_ts_id[] = {
 MODULE_DEVICE_TABLE(i2c, fts_ts_id);
 
 static struct of_device_id fts_match_table[] = {
-    { .compatible = "radxa,fts", },
+    { .compatible = "radxa_fts", },
     { },
 };
 

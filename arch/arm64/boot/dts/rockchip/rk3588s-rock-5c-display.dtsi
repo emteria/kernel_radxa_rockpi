@@ -24,6 +24,7 @@
 		gpio = <&gpio4 RK_PA4 GPIO_ACTIVE_HIGH>;
 		enable-active-high;
 		regulator-boot-on;
+		regulator-always-on;
 		regulator-state-mem {
 			regulator-off-in-suspend;
 		};
@@ -92,6 +93,7 @@
 		reg = <0>;
 		backlight = <&backlight>;
 
+		power-supply = <&vcc_lcd_mipi0>; //raspberrypi driver usage
 		vdd-supply = <&vcc_lcd_mipi0>;
 		vccio-supply = <&vcc_1v8_s0>;
 		reset-gpios = <&gpio3 RK_PC1 GPIO_ACTIVE_HIGH>;
@@ -164,17 +166,35 @@
 	};
 
 	//dsi0 : compatible ="radxa,display-10hd-a";
-	// focaltech: focaltech@38 {
-	// 	status = "okay";
-	// 	compatible = "focaltech,fts";
-	// 	reg = <0x38>;
-	// 	pinctrl-names = "default";
-	// 	pinctrl-0 = <&focaltech_gpio>;
-	// 	focaltech,irq-gpio = <&gpio3 RK_PC6 IRQ_TYPE_LEVEL_LOW>;
-	// 	focaltech,reset-gpio = <&gpio3 RK_PC5 GPIO_ACTIVE_HIGH>;
-	// 	focaltech,display-coords = <0 0 799 1279>;
-	// 	tp-supply = <&vcc_lcd_mipi0>;
-	// };
+	focaltech: focaltech-radxa@38 {
+		status = "okay";
+		compatible = "focaltech_fts";
+		reg = <0x38>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&focaltech_gpio>;
+		focaltech,irq-gpio = <&gpio3 RK_PC6 IRQ_TYPE_LEVEL_LOW>;
+		focaltech,reset-gpio = <&gpio3 RK_PC5 GPIO_ACTIVE_HIGH>;
+		focaltech,display-coords = <0 0 799 1279>;
+		tp-supply = <&vcc_lcd_mipi0>;
+	};
+
+    focaltech1: focaltech-raspberrypi@38 {
+               status = "okay";
+               compatible = "radxa_fts";
+               reg = <0x38>;
+               irq_mode = <0>; //0 poll ,1 irq
+               x_reverse = <1>;
+               y_reverse = <1>;
+               xy_swap = <0>;
+               focaltech,display-coords =  <0 0 800 480>;
+               focaltech,max-touch-number = <5>;
+     };
+
+	rockpi_mcu: rockpi-mcu@45 {
+		compatible = "rockpi_mcu";
+		reg = <0x45>;
+		status = "okay";
+	};
 };
 
 &pinctrl {
@@ -197,11 +217,11 @@
 		};
 	};
 
-	// focaltech {
-	// 	focaltech_gpio: focaltech-gpio {
-	// 		rockchip,pins =
-	// 			<3 RK_PC5 RK_FUNC_GPIO &pcfg_pull_none>,
-	// 			<3 RK_PC6 RK_FUNC_GPIO &pcfg_pull_up>;
-	// 	};
-	// };
+	focaltech {
+		focaltech_gpio: focaltech-gpio {
+			rockchip,pins =
+				<3 RK_PC5 RK_FUNC_GPIO &pcfg_pull_none>,
+				<3 RK_PC6 RK_FUNC_GPIO &pcfg_pull_up>;
+		};
+	};
 };

@@ -420,9 +420,13 @@ static int panel_simple_regulator_disable(struct panel_simple *p)
 
 int panel_simple_loader_protect(struct drm_panel *panel)
 {
-	struct panel_simple *p = to_panel_simple(panel);
+	struct panel_simple *p = NULL;
 	int err;
 
+	if(panel->connector_type == DRM_MODE_CONNECTOR_DSI)
+		return 0;
+
+	p = to_panel_simple(panel);
 	err = panel_simple_regulator_enable(p);
 	if (err < 0) {
 		dev_err(panel->dev, "failed to enable supply: %d\n", err);
@@ -964,7 +968,7 @@ static const struct drm_display_mode ampire_am_1280800n3tzqw_t00h_mode = {
 static const struct panel_desc ampire_am_1280800n3tzqw_t00h = {
 	.modes = &ampire_am_1280800n3tzqw_t00h_mode,
 	.num_modes = 1,
-	.bpc = 8,
+	.bpc = 6,
 	.size = {
 		.width = 217,
 		.height = 136,
@@ -2432,7 +2436,6 @@ static const struct panel_desc innolux_g070y2_l01 = {
 		.unprepare = 800,
 	},
 	.bus_format = MEDIA_BUS_FMT_RGB888_1X7X4_SPWG,
-	.bus_flags = DRM_BUS_FLAG_DE_HIGH,
 	.connector_type = DRM_MODE_CONNECTOR_LVDS,
 };
 
@@ -2489,7 +2492,7 @@ static const struct panel_desc innolux_g121i1_l01 = {
 		.enable = 200,
 		.disable = 20,
 	},
-	.bus_format = MEDIA_BUS_FMT_RGB666_1X7X3_SPWG,
+	.bus_format = MEDIA_BUS_FMT_RGB888_1X7X4_SPWG,
 	.connector_type = DRM_MODE_CONNECTOR_LVDS,
 };
 
@@ -2943,7 +2946,6 @@ static const struct display_timing logictechno_lt161010_2nh_timing = {
 static const struct panel_desc logictechno_lt161010_2nh = {
 	.timings = &logictechno_lt161010_2nh_timing,
 	.num_timings = 1,
-	.bpc = 6,
 	.size = {
 		.width = 154,
 		.height = 86,
@@ -2973,7 +2975,6 @@ static const struct display_timing logictechno_lt170410_2whc_timing = {
 static const struct panel_desc logictechno_lt170410_2whc = {
 	.timings = &logictechno_lt170410_2whc_timing,
 	.num_timings = 1,
-	.bpc = 8,
 	.size = {
 		.width = 217,
 		.height = 136,
