@@ -282,6 +282,7 @@
 		vin-supply = <&vcc5v0_sys>;
 	};
 
+	/*
 	vcc3v3_lcd_n: vcc3v3-lcd0-n {
 		compatible = "regulator-fixed";
 		regulator-name = "vcc3v3_lcd0_n";
@@ -292,7 +293,7 @@
 			regulator-off-in-suspend;
 		};
 	};
-
+	*/
 	vcc3v3_pcie30: vcc3v3-pcie30 {
 		compatible = "regulator-fixed";
 		regulator-name = "vcc3v3_pcie30";
