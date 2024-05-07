@@ -30,7 +30,7 @@
 #define buf_desc_debug(...)  do {} while (0)
 #endif
 
-static void rtl8822ce_xmit_tasklet(void *priv)
+static void rtl8822ce_xmit_tasklet(unsigned long priv)
 {
 	_irqL irqL;
 	_adapter *padapter = (_adapter *)priv;
@@ -52,7 +52,7 @@ s32 rtl8822ce_init_xmit_priv(_adapter *padapter)
 
 #ifdef PLATFORM_LINUX
 	tasklet_init(&pxmitpriv->xmit_tasklet,
-		     (void(*)(unsigned long))rtl8822ce_xmit_tasklet,
+		     rtl8822ce_xmit_tasklet,
 		     (unsigned long)padapter);
 #endif
 	rtl8822c_init_xmit_priv(padapter);
@@ -299,8 +299,8 @@ static void rtl8822ce_update_txbd(struct xmit_frame *pxmitframe,
 #ifdef CONFIG_PCIE_DMA_COHERENT
 	mapping = (dma_addr_t)pxmitframe->pxmitbuf->dma_bpa;
 #else
-	mapping = pci_map_single(pdvobjpriv->ppcidev, pxmitframe->buf_addr ,
-				 sz + TX_WIFI_INFO_SIZE, PCI_DMA_TODEVICE);
+	mapping = dma_map_single(&pdvobjpriv->ppcidev->dev, pxmitframe->buf_addr ,
+				 sz + TX_WIFI_INFO_SIZE, DMA_TO_DEVICE);
 #endif
 
 	/* Calculate page size.
@@ -1318,12 +1318,8 @@ int rtl8822ce_init_txbd_ring(_adapter *padapter, unsigned int q_idx,
 
 	RTW_INFO("%s entries num:%d\n", __func__, entries);
 
-#ifdef CONFIG_PCIE_DMA_COHERENT
 	txbd = dma_alloc_coherent(&pdev->dev,
-				  sizeof(*txbd) * entries, &dma, GFP_KERNEL);
-#else
-	txbd = pci_alloc_consistent(pdev, sizeof(*txbd) * entries, &dma);
-#endif
+				  sizeof(*txbd) * entries, &dma, GFP_ATOMIC);
 
 	if (!txbd || (unsigned long)txbd & 0xFF) {
 		RTW_INFO("Cannot allocate TXBD (q_idx = %d)\n", q_idx);
@@ -1369,9 +1365,9 @@ void rtl8822ce_free_txbd_ring(_adapter *padapter, unsigned int prio)
 		#ifdef CONFIG_64BIT_DMA
 			mapping |= (dma_addr_t)GET_TX_BD_PHYSICAL_ADDR0_HIGH(txbd) << 32;
 		#endif
-			pci_unmap_single(pdev,
+			dma_unmap_single(&pdev->dev,
 				mapping,
-				pxmitbuf->len, PCI_DMA_TODEVICE);
+				pxmitbuf->len, DMA_TO_DEVICE);
 #endif
 			rtw_free_xmitbuf(t_priv, pxmitbuf);
 
@@ -1382,13 +1378,8 @@ void rtl8822ce_free_txbd_ring(_adapter *padapter, unsigned int prio)
 		}
 	}
 
-#ifdef CONFIG_PCIE_DMA_COHERENT
 	dma_free_coherent(&pdev->dev, sizeof(*ring->buf_desc) * ring->entries,
 			  ring->buf_desc, ring->dma);
-#else
-	pci_free_consistent(pdev, sizeof(*ring->buf_desc) * ring->entries,
-			    ring->buf_desc, ring->dma);
-#endif
 	ring->buf_desc = NULL;
 
 }
@@ -1523,9 +1514,9 @@ void rtl8822ce_tx_isr(PADAPTER Adapter, int prio)
 			mapping |= (dma_addr_t)GET_TX_BD_PHYSICAL_ADDR0_HIGH(tx_desc) << 32;
 		#endif
 		#ifndef CONFIG_PCIE_DMA_COHERENT
-			pci_unmap_single(pdvobjpriv->ppcidev,
+			dma_unmap_single(&pdvobjpriv->ppcidev->dev,
 				mapping,
-				pxmitbuf->len, PCI_DMA_TODEVICE);
+				pxmitbuf->len, DMA_TO_DEVICE);
 		#endif
 			rtw_sctx_done(&pxmitbuf->sctx);
 			rtw_free_xmitbuf(&(pxmitbuf->padapter->xmitpriv),
@@ -1604,9 +1595,9 @@ void rtl8822ce_tx_isr(PADAPTER Adapter, int prio)
 			mapping |= (dma_addr_t)GET_TX_BD_PHYSICAL_ADDR0_HIGH(tx_desc) << 32;
 		#endif
 		#ifndef CONFIG_PCIE_DMA_COHERENT
-			pci_unmap_single(pdvobjpriv->ppcidev,
+			dma_unmap_single(&pdvobjpriv->ppcidev->dev,
 				 GET_TX_BD_PHYSICAL_ADDR0_LOW(tx_desc),
-					 pxmitbuf->len, PCI_DMA_TODEVICE);
+					 pxmitbuf->len, DMA_TO_DEVICE);
 		#endif
 			rtw_sctx_done(&pxmitbuf->sctx);
 			rtw_free_xmitbuf(&(pxmitbuf->padapter->xmitpriv),
@@ -1635,6 +1626,30 @@ void rtl8822ce_tx_isr(PADAPTER Adapter, int prio)
 		rtw_mi_xmit_tasklet_schedule(Adapter);
 }
 #endif /* CONFIG_BCN_ICF */
+
+void rtl8822ce_hci_flush(PADAPTER Adapter, u32 queue_idx)
+{
+	struct xmit_priv *t_priv = &Adapter->xmitpriv;
+	struct rtw_tx_ring *ring = &t_priv->tx_ring[queue_idx];
+	u32 i, tmp32, cur_rp, cur_wp;
+
+	/* bcn queue should not enter this function */
+	if (queue_idx == BCN_QUEUE_INX)
+		return;
+
+	for (i= 0; i < 30; i++) {
+		tmp32 = rtw_read32(Adapter, get_txbd_rw_reg(queue_idx));
+		cur_rp = (tmp32 >> 16) & 0x0FFF;
+		cur_wp = tmp32 & 0x0FFF;
+
+		if (cur_rp == cur_wp)
+			return;
+
+		rtw_udelay_os(1);
+	}
+
+	RTW_INFO("%s timeout!(%d-%d)\n", __func__, cur_rp, cur_wp);
+}
 
 #ifdef CONFIG_HOSTAPD_MLME
 static void rtl8812ae_hostap_mgnt_xmit_cb(struct urb *urb)

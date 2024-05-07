@@ -192,7 +192,7 @@ static void rtl8822ce_rx_mpdu(_adapter *padapter)
 			       GET_RX_BD_PHYSICAL_ADDR_LOW(rx_bd));
 
 		/* wait until packet is ready. this operation is similar to
-		 * check own bit and should be called before pci_unmap_single
+		 * check own bit and should be called before dma_unmap_single
 		 * which release memory mapping
 		 */
 
@@ -211,15 +211,11 @@ static void rtl8822ce_rx_mpdu(_adapter *padapter)
 			_rtw_init_listhead(&precvframe->u.hdr.list);
 			precvframe->u.hdr.len = 0;
 
-#ifdef CONFIG_PCIE_DMA_COHERENT
-			memcpy(skb->data,
-			       r_priv->rx_ring[rx_q_idx].vdma_bpa[r_priv->rx_ring[rx_q_idx].idx],
-			       r_priv->rxbuffersize);
-#else
-			pci_unmap_single(pdvobjpriv->ppcidev,
+#ifndef CONFIG_PCIE_DMA_COHERENT
+			dma_unmap_single(&pdvobjpriv->ppcidev->dev,
 					 *((dma_addr_t *)skb->cb),
 					 r_priv->rxbuffersize,
-					 PCI_DMA_FROMDEVICE);
+					 DMA_FROM_DEVICE);
 #endif
 
 			rtl8822c_query_rx_desc(precvframe, skb->data);
@@ -254,10 +250,10 @@ static void rtl8822ce_rx_mpdu(_adapter *padapter)
 				RTW_INFO("rtl8822ce_rx_mpdu:can't allocate memory for skb copy\n");
 #ifndef CONFIG_PCIE_DMA_COHERENT
 				*((dma_addr_t *) skb->cb) =
-					pci_map_single(pdvobjpriv->ppcidev,
+					dma_map_single(&pdvobjpriv->ppcidev->dev,
 						       skb_tail_pointer(skb),
 						       r_priv->rxbuffersize,
-						       PCI_DMA_FROMDEVICE);
+						       DMA_FROM_DEVICE);
 #endif
 				goto done;
 			}
@@ -279,10 +275,10 @@ static void rtl8822ce_rx_mpdu(_adapter *padapter)
 			}
 #ifndef CONFIG_PCIE_DMA_COHERENT
 			*((dma_addr_t *) skb->cb) =
-				pci_map_single(pdvobjpriv->ppcidev,
+				dma_map_single(&pdvobjpriv->ppcidev->dev,
 					       skb_tail_pointer(skb),
 					       r_priv->rxbuffersize,
-					       PCI_DMA_FROMDEVICE);
+					       DMA_FROM_DEVICE);
 #endif
 		}
 done:
@@ -310,7 +306,7 @@ done:
 	}
 }
 
-static void rtl8822ce_recv_tasklet(void *priv)
+static void rtl8822ce_recv_tasklet(unsigned long priv)
 {
 	_irqL	irqL;
 	_adapter	*padapter = (_adapter *)priv;
@@ -339,7 +335,7 @@ static void rtl8822ce_xmit_beacon(PADAPTER Adapter)
 #endif
 }
 
-static void rtl8822ce_prepare_bcn_tasklet(void *priv)
+static void rtl8822ce_prepare_bcn_tasklet(unsigned long priv)
 {
 	_adapter *padapter = (_adapter *)priv;
 
@@ -354,11 +350,11 @@ s32 rtl8822ce_init_recv_priv(_adapter *padapter)
 
 #ifdef PLATFORM_LINUX
 	tasklet_init(&precvpriv->recv_tasklet,
-		     (void(*)(unsigned long))rtl8822ce_recv_tasklet,
+		     rtl8822ce_recv_tasklet,
 		     (unsigned long)padapter);
 
 	tasklet_init(&precvpriv->irq_prepare_beacon_tasklet,
-		     (void(*)(unsigned long))rtl8822ce_prepare_bcn_tasklet,
+		     rtl8822ce_prepare_bcn_tasklet,
 		     (unsigned long)padapter);
 #endif
 
@@ -386,19 +382,11 @@ int rtl8822ce_init_rxbd_ring(_adapter *padapter)
 	/* rx_queue_idx 0:RX_MPDU_QUEUE */
 	/* rx_queue_idx 1:RX_CMD_QUEUE */
 	for (rx_queue_idx = 0; rx_queue_idx < 1; rx_queue_idx++) {
-#ifdef CONFIG_PCIE_DMA_COHERENT
 		r_priv->rx_ring[rx_queue_idx].buf_desc =
 			dma_alloc_coherent(&pdev->dev,
 					   sizeof(*r_priv->rx_ring[rx_queue_idx].buf_desc) *
 					   r_priv->rxringcount,
-					   &r_priv->rx_ring[rx_queue_idx].dma, GFP_KERNEL);
-#else
-		r_priv->rx_ring[rx_queue_idx].buf_desc =
-			pci_alloc_consistent(pdev,
-			     sizeof(*r_priv->rx_ring[rx_queue_idx].buf_desc) *
-					     r_priv->rxringcount,
-				     &r_priv->rx_ring[rx_queue_idx].dma);
-#endif
+					   &r_priv->rx_ring[rx_queue_idx].dma, GFP_ATOMIC);
 
 		if (!r_priv->rx_ring[rx_queue_idx].buf_desc ||
 		    (unsigned long)r_priv->rx_ring[rx_queue_idx].buf_desc &
@@ -413,7 +401,11 @@ int rtl8822ce_init_rxbd_ring(_adapter *padapter)
 		r_priv->rx_ring[rx_queue_idx].idx = 0;
 
 		for (i = 0; i < r_priv->rxringcount; i++) {
+#ifdef CONFIG_PCIE_DMA_COHERENT
+			skb = dev_alloc_skb_coherent(pdev, r_priv->rxbuffersize);
+#else
 			skb = dev_alloc_skb(r_priv->rxbuffersize);
+#endif
 			if (!skb) {
 				RTW_INFO("Cannot allocate skb for RX ring\n");
 				return _FAIL;
@@ -423,18 +415,13 @@ int rtl8822ce_init_rxbd_ring(_adapter *padapter)
 			r_priv->rx_ring[rx_queue_idx].rx_buf[i] = skb;
 			mapping = (dma_addr_t *)skb->cb;
 
-#ifdef CONFIG_PCIE_DMA_COHERENT
-			r_priv->rx_ring[rx_queue_idx].vdma_bpa[i] =
-				dma_alloc_coherent(&pdev->dev,
-						   r_priv->rxbuffersize, mapping, GFP_KERNEL);
-#else
 			/* just set skb->cb to mapping addr
-			 * for pci_unmap_single use */
-			*mapping = pci_map_single(pdev, skb_tail_pointer(skb),
+			 * for dma_unmap_single use */
+#ifndef CONFIG_PCIE_DMA_COHERENT
+			*mapping = dma_map_single(&pdev->dev, skb_tail_pointer(skb),
 						  r_priv->rxbuffersize,
-						  PCI_DMA_FROMDEVICE);
+						  DMA_FROM_DEVICE);
 #endif
-
 			/* Reset FS, LS, Total len */
 			SET_RX_BD_LS(rx_desc, 0);
 			SET_RX_BD_FS(rx_desc, 0);
@@ -457,6 +444,7 @@ int rtl8822ce_init_rxbd_ring(_adapter *padapter)
 	return _SUCCESS;
 }
 
+#ifdef CONFIG_PCIE_DMA_COHERENT
 void rtl8822ce_free_rxbd_ring(_adapter *padapter)
 {
 	struct recv_priv *r_priv = &padapter->recvpriv;
@@ -475,32 +463,56 @@ void rtl8822ce_free_rxbd_ring(_adapter *padapter)
 
 			if (!skb)
 				continue;
-#ifdef CONFIG_PCIE_DMA_COHERENT
-			dma_free_coherent(&pdev->dev, r_priv->rxbuffersize,
-					  r_priv->rx_ring[rx_queue_idx].vdma_bpa[i],
-					  *((dma_addr_t *) skb->cb));
-#else
-			pci_unmap_single(pdev,
-					 *((dma_addr_t *) skb->cb),
-					 r_priv->rxbuffersize,
-					 PCI_DMA_FROMDEVICE);
-#endif
-			kfree_skb(skb);
-		}
 
-#ifdef CONFIG_PCIE_DMA_COHERENT
+			/* skb buf */
+			dma_free_coherent(&pdev->dev, r_priv->rxringcount,
+				(dma_addr_t *)skb->data, *(dma_addr_t *)skb->cb);
+
+			/* skb */
+			_rtw_mfree(skb, sizeof(struct sk_buff));
+		}
 		dma_free_coherent(&pdev->dev,
 				  sizeof(*r_priv->rx_ring[rx_queue_idx].buf_desc) *
 				  r_priv->rxringcount,
 				  r_priv->rx_ring[rx_queue_idx].buf_desc,
 				  r_priv->rx_ring[rx_queue_idx].dma);
+		r_priv->rx_ring[rx_queue_idx].buf_desc = NULL;
+	} /* for */
+}
 #else
-		pci_free_consistent(pdev,
+void rtl8822ce_free_rxbd_ring(_adapter *padapter)
+{
+	struct recv_priv *r_priv = &padapter->recvpriv;
+	struct dvobj_priv *pdvobjpriv = adapter_to_dvobj(padapter);
+	struct pci_dev *pdev = pdvobjpriv->ppcidev;
+	int i, rx_queue_idx;
+
+
+	/* rx_queue_idx 0:RX_MPDU_QUEUE */
+	/* rx_queue_idx 1:RX_CMD_QUEUE */
+	for (rx_queue_idx = 0; rx_queue_idx < 1; rx_queue_idx++) {
+		for (i = 0; i < r_priv->rxringcount; i++) {
+			struct sk_buff *skb;
+
+			skb = r_priv->rx_ring[rx_queue_idx].rx_buf[i];
+
+			if (!skb)
+				continue;
+
+			dma_unmap_single(&pdev->dev,
+					 *((dma_addr_t *) skb->cb),
+					 r_priv->rxbuffersize,
+					 DMA_FROM_DEVICE);
+			kfree_skb(skb);
+		}
+
+		dma_free_coherent(&pdev->dev,
 			    sizeof(*r_priv->rx_ring[rx_queue_idx].buf_desc) *
 				    r_priv->rxringcount,
 				    r_priv->rx_ring[rx_queue_idx].buf_desc,
 				    r_priv->rx_ring[rx_queue_idx].dma);
-#endif
+
 		r_priv->rx_ring[rx_queue_idx].buf_desc = NULL;
 	} /* for */
 }
+#endif /* CONFIG_PCIE_DMA_COHERENT */

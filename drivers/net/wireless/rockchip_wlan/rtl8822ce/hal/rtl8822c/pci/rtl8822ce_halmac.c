@@ -38,12 +38,8 @@ static u8 pci_write_port_not_xmitframe(void *d,  u32 size, dma_addr_t mapping,  
 			tx_page_used++;
 	}
 
-#ifdef CONFIG_PCIE_DMA_COHERENT
 	txbd = dma_alloc_coherent(&pdev->dev,
-		sizeof(struct tx_buf_desc), &txbd_dma, GFP_KERNEL);
-#else
-	txbd = pci_alloc_consistent(pdev, sizeof(struct tx_buf_desc), &txbd_dma);
-#endif
+		sizeof(struct tx_buf_desc), &txbd_dma, GFP_ATOMIC);
 
 	if (!txbd) {
 		ret = _FAIL;
@@ -121,11 +117,7 @@ static u8 pci_write_port_not_xmitframe(void *d,  u32 size, dma_addr_t mapping,  
 	udelay(100);
 
 DMA_FREE:
-#ifdef CONFIG_PCIE_DMA_COHERENT
 	dma_free_coherent(&pdev->dev, sizeof(struct tx_buf_desc), txbd, txbd_dma);
-#else
-	pci_free_consistent(pdev, sizeof(struct tx_buf_desc), txbd, txbd_dma);
-#endif
 
 	return ret;
 }
@@ -187,7 +179,7 @@ static u8 pci_write_data_not_xmitframe(void *d, u8 *pBuf, u32 size, u8 qsel)
 
 #ifndef CONFIG_PCIE_DMA_COHERENT
 	/* map TX DESC buf_addr (including TX DESC + tx data) */
-	mapping = pci_map_single(pdev, buf, len, PCI_DMA_TODEVICE);
+	mapping = dma_map_single(&pdev->dev, buf, len, DMA_TO_DEVICE);
 #endif
 	ret = pci_write_port_not_xmitframe(d, size, mapping, qsel);
 
@@ -199,7 +191,7 @@ static u8 pci_write_data_not_xmitframe(void *d, u8 *pBuf, u32 size, u8 qsel)
 #ifdef CONFIG_PCIE_DMA_COHERENT
 	dma_free_coherent(&pdev->dev, len, buf, mapping);
 #else
-	pci_unmap_single(pdev, mapping, len, PCI_DMA_FROMDEVICE);
+	dma_unmap_single(&pdev->dev, mapping, len, DMA_FROM_DEVICE);
 	rtw_mfree(buf, len);
 #endif
 
@@ -276,7 +268,7 @@ static u8 pci_write_data_rsvd_page_xmitframe(void *d, u8 *pBuf, u32 size)
 #ifdef CONFIG_64BIT_DMA
 	mapping |= (dma_addr_t)GET_TX_BD_PHYSICAL_ADDR0_HIGH(txbd) << 32;
 #endif
-	pci_unmap_single(pdev, mapping, pxmitbuf->len, PCI_DMA_TODEVICE);
+	dma_unmap_single(&pdev->dev, mapping, pxmitbuf->len, DMA_TO_DEVICE);
 #endif
 
 	return _TRUE;

@@ -131,6 +131,7 @@ u32 InitMAC_TRXBD_8822CE(PADAPTER adapter);
 void rtl8822ce_reset_bd(_adapter *padapter);
 
 void rtl8822ce_xmitframe_resume(PADAPTER);
+void rtl8822ce_hci_flush(PADAPTER Adapter, u32 queue);
 
 /* rtl8822cs_recv.c */
 s32 rtl8822ce_init_recv_priv(PADAPTER);

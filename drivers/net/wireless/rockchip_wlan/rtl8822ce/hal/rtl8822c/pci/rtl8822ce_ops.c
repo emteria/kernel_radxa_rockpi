@@ -91,9 +91,9 @@ void rtl8822ce_reset_bd(_adapter *padapter)
 				#ifdef CONFIG_64BIT_DMA
 					mapping |= (dma_addr_t)GET_TX_BD_PHYSICAL_ADDR0_HIGH(tx_bd) << 32;
 				#endif
-					pci_unmap_single(pdvobjpriv->ppcidev,
+					dma_unmap_single(&pdvobjpriv->ppcidev->dev,
 						mapping,
-						pxmitbuf->len, PCI_DMA_TODEVICE);
+						pxmitbuf->len, DMA_TO_DEVICE);
 				#endif
 					rtw_free_xmitbuf(t_priv, pxmitbuf);
 				} else {
@@ -525,10 +525,10 @@ static void rtl8822ce_unmap_beacon_icf(PADAPTER Adapter)
 	}
 //	RTW_INFO("FREE pxmitbuf: %p, buf_desc: %p, sz: %d\n", pxmitbuf, tx_bufdesc, pxmitbuf->len);
 
-	pci_unmap_single(pdvobjpriv->ppcidev,
+	dma_unmap_single(&pdvobjpriv->ppcidev->dev,
 			 GET_TX_BD_PHYSICAL_ADDR0_LOW(tx_bufdesc),
 			 pxmitbuf->len,
-			 PCI_DMA_TODEVICE);
+			 DMA_TO_DEVICE);
 }
 
 u32 rtl8822ce_init_bd(_adapter *padapter)
@@ -925,4 +925,6 @@ void rtl8822ce_set_hal_ops(PADAPTER padapter)
 	ops->tx_poll_handler = rtl8822ce_tx_poll_handler;
 #endif
 	ops->unmap_beacon_icf = rtl8822ce_unmap_beacon_icf;
+
+	ops->hci_flush = rtl8822ce_hci_flush;
 }
