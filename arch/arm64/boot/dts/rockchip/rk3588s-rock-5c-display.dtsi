@@ -148,7 +148,7 @@
 	status = "okay";
 	pinctrl-names = "default";
 	pinctrl-0 = <&i2c5m2_xfer>;
-	clock-frequency = <400000>;
+	// clock-frequency = <400000>;
 
 	// dsi0 : compatible = "radxa,display-8hd" tp-size = <9112>; compatible ="radxa,display-10hd-N40A" tp-size = <9271>;
 	gt9xx: gt9xx@14 {
