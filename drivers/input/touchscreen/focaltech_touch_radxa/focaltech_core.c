@@ -968,6 +968,7 @@ static void event_work_func(struct work_struct *work)
     fts_esdcheck_set_intr(0);
 #endif
 
+    return;
 }
 
 /*****************************************************************************
@@ -1496,12 +1497,11 @@ static int fts_ts_probe(struct i2c_client *client, const struct i2c_device_id *i
     fts_reset_proc_r(200);
 #endif
 
-
-    ret = fts_get_ic_information(ts_data);
-    if (ret) {
-        FTS_ERROR("not focal IC, unregister driver");
-        goto err_irq_req;
-    }
+    // ret = fts_get_ic_information(ts_data);
+    // if (ret) {
+    //     FTS_ERROR("not focal IC, unregister driver");
+    //     goto err_irq_req;
+    // }
 
 #if FTS_APK_NODE_EN
     ret = fts_create_apk_debug_channel(ts_data);
