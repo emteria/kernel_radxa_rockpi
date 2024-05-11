@@ -11,10 +11,11 @@
 // #include "rk3588s-radxa-cm5-radxa-10inch-display.dtsi"
 // #include "rk3588s-radxa-cm5io-radxa-10inch-display.dtsi"
 // #include "rk3588s-radxa-cm5-radxa-10inch-FHD-display.dtsi"
-#include "rk3588s-radxa-cm5io-radxa-10inch-FHD-display.dtsi"
+// #include "rk3588s-radxa-cm5io-radxa-10inch-FHD-display.dtsi"
 // #include "rk3588s-radxa-cm5-radxa-8inch-display.dtsi"
 #include "rk3588s-radxa-cm5io-camera.dtsi"
-#include "rk3588s-radxa-cm5-raspi-7-inch-touchscreen.dtsi"
+#include "rk3588s-radxa-cm5-display.dtsi"
+// #include "rk3588s-radxa-cm5-raspi-7-inch-touchscreen.dtsi"
 
 / {
 	model = "Radxa CM5 IO";
