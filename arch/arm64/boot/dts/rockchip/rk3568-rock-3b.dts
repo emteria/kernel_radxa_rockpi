@@ -162,14 +162,16 @@
 	};
 
 	pcie30_3v3: gpio-regulator {
-		compatible = "regulator-gpio";
-		regulator-name = "pcie30_3v3";
-		regulator-min-microvolt = <100000>;
+		compatible = "regulator-fixed";
+		regulator-name = "vcc3v3_pcie";
+		regulator-min-microvolt = <3300000>;
 		regulator-max-microvolt = <3300000>;
-		gpios = <&gpio0 RK_PD4 GPIO_ACTIVE_HIGH>;
-		gpios-states = <0x1>;
-		states = <100000 0x0
-			  3300000 0x1>;
+		enable-active-high;
+		regulator-always-on;
+		regulator-boot-on;
+		gpio = <&gpio0 RK_PD4 GPIO_ACTIVE_HIGH>;
+		startup-delay-us = <5000>;
+		vin-supply = <&vcc5v0_sys>;
 	};
 
 	sdio_pwrseq: sdio-pwrseq {
@@ -1059,16 +1061,7 @@
 	status = "okay";
 };
 
-&pcie3x1 {
-	rockchip,bifurcation;
-	reset-gpios = <&gpio3 RK_PA1 GPIO_ACTIVE_HIGH>;
-	pinctrl-0 = <&pcie30x1m1_pins>; 
-	vpcie3v3-supply = <&pcie30_3v3>;
-	status = "disabled";
-};
-
 &pcie3x2 {
-	//rockchip,bifurcation;
 	reset-gpios = <&gpio2 RK_PD6 GPIO_ACTIVE_HIGH>;
 	pinctrl-0 = <&pcie30x2m1_pins>;
 	vpcie3v3-supply = <&pcie30_3v3>;
