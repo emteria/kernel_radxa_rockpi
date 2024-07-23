@@ -7,7 +7,8 @@
 #include <dt-bindings/sensor-dev.h>
 #include "rk3568.dtsi"
 #include "rk3568-android.dtsi"
-#include "rk3568-radxa-cm3i-10inch-FHD-touchscreen.dtsi"
+// #include "rk3568-radxa-cm3i-10inch-FHD-touchscreen.dtsi"
+#include "rk3568-radxa-cm3i-8inch-touchscreen.dtsi"
 #include "rk3568-radxa-cm3i_219.dtsi"
 
 
@@ -830,6 +831,7 @@
 	snps,reset-active-low;
 	/* Reset time is 20ms, 100ms for rtl8211f */
 	snps,reset-delays-us = <0 20000 100000>;
+	mac_from_sn = "1";
 
 	assigned-clocks = <&cru SCLK_GMAC0_RX_TX>, <&cru SCLK_GMAC0>;
 	assigned-clock-parents = <&cru SCLK_GMAC0_RGMII_SPEED>;
@@ -858,6 +860,7 @@
 	/* Reset time is 20ms, 100ms for rtl8211f */
 	//snps,reset-delays-us = <0 20000 100000>;
 	snps,reset-delays-us = <0 50000 150000>;
+	mac_from_sn = "2";
 
 	assigned-clocks = <&cru SCLK_GMAC1_RX_TX>, <&cru SCLK_GMAC1>;
 	assigned-clock-parents = <&cru SCLK_GMAC1_RGMII_SPEED>;
