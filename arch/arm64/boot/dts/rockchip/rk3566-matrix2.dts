@@ -1,0 +1,12 @@
+/dts-v1/;
+
+#include "rk3399-rockpi-4b.dts"
+
+&display_subsystem {
+    route {
+        route_hdmi: route-hdmi {
+            logo,uboot = "logo_black.bmp";
+            logo,kernel = "logo_black.bmp";
+        };
+    };
+};
