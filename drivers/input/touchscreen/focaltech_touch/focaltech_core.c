@@ -54,6 +54,14 @@
 #endif
 
 #define CFG_SWAP_XY
+
+static int xy_swap = 1;
+static int x_reverse = 0;
+static int y_reverse = 1;
+
+
+static int ic_ready = 0;
+static int irq_mode = 1;
 /*****************************************************************************
 * Global variable or extern global variabls/functions
 *****************************************************************************/
@@ -76,13 +84,14 @@ static int fts_ts_resume(struct device *dev);
 int fts_reset_proc(int hdelayms)
 {
     FTS_FUNC_ENTER();
-    gpio_direction_output(fts_data->pdata->reset_gpio, 0);
-    msleep(5);
-    gpio_direction_output(fts_data->pdata->reset_gpio, 1);
-    if (hdelayms) {
-        msleep(hdelayms);
+    if(gpio_is_valid(fts_data->pdata->reset_gpio)) {
+        gpio_direction_output(fts_data->pdata->reset_gpio, 0);
+        msleep(5);
+        gpio_direction_output(fts_data->pdata->reset_gpio, 1);
+        if (hdelayms) {
+            msleep(hdelayms);
+        }
     }
-
     FTS_FUNC_EXIT();
     return 0;
 }
@@ -648,11 +657,16 @@ static int fts_input_report_b(struct fts_ts_data *data)
             if (events[i].area <= 0) {
                 events[i].area = 0x09;
             }
-#ifdef CFG_SWAP_XY
-        swap(events[i].x,events[i].y);
-#endif /* CFG_CTS_SWAP_XY */
 
+        if ( 1 == xy_swap )
+            swap(events[i].x,events[i].y);
+
+        if (1 == x_reverse)
+            events[i].x = data->pdata->x_max - events[i].x;
 		
+        if (1 == y_reverse)
+            events[i].y = data->pdata->y_max - events[i].y;
+
             input_report_abs(data->input_dev, ABS_MT_TOUCH_MAJOR, events[i].area);
 #if 0
             input_report_abs(data->input_dev, ABS_MT_POSITION_X, 2176 - events[i].x);
@@ -660,8 +674,7 @@ static int fts_input_report_b(struct fts_ts_data *data)
 #else
             input_report_abs(data->input_dev, ABS_MT_POSITION_X, events[i].x);
             // Radxa Customization
-            // input_report_abs(data->input_dev, ABS_MT_POSITION_Y, events[i].y);
-            input_report_abs(data->input_dev, ABS_MT_POSITION_Y, data->pdata->x_max - events[i].y);
+            input_report_abs(data->input_dev, ABS_MT_POSITION_Y, events[i].y);
             // Radxa Customization end
 #endif
 			//printk("bb...x = %d, y - %d\n...", events[i].x, 2176 - events[i].y, events[i].p);
@@ -914,6 +927,50 @@ static irqreturn_t fts_ts_interrupt(int irq, void *data)
     return IRQ_HANDLED;
 }
 
+static void event_work_func(struct work_struct *work)
+{
+    int ret = 0;
+    u8 chip_id[2] = { 0 };
+    struct i2c_client *client;
+    struct fts_ts_data *ts_data = container_of(work,struct fts_ts_data, event_work.work);
+
+    if (!ts_data) {
+        FTS_ERROR("[INTR]: Invalid fts_ts_data");
+        return;
+    }
+
+    if (0 == ic_ready) {
+        client = ts_data->client;
+        ret = fts_i2c_read_reg(client, FTS_REG_CHIP_ID, &chip_id[0]);
+        FTS_INFO("chip id :0x%02x ", chip_id[0]);
+        if (ret < 0){
+              queue_delayed_work(ts_data->ts_workqueue, &ts_data->event_work, msecs_to_jiffies(1000));
+              return;
+        } else {
+            ic_ready = 1;
+        }
+    }
+
+
+#if FTS_ESDCHECK_EN
+    fts_esdcheck_set_intr(1);
+#endif
+    ret = fts_read_touchdata(ts_data);
+    if (ret == 0) {
+        mutex_lock(&ts_data->report_mutex);
+        fts_report_event(ts_data);
+        mutex_unlock(&ts_data->report_mutex);
+    }
+
+    queue_delayed_work(ts_data->ts_workqueue, &ts_data->event_work, msecs_to_jiffies(15));
+#if FTS_ESDCHECK_EN
+    fts_esdcheck_set_intr(0);
+#endif
+
+}
+
+
+
 /*****************************************************************************
 *  Name: fts_irq_registration
 *  Brief:
@@ -926,20 +983,29 @@ static int fts_irq_registration(struct fts_ts_data *ts_data)
     int ret = 0;
     struct fts_ts_platform_data *pdata = ts_data->pdata;
 
-    ts_data->irq = gpio_to_irq(pdata->irq_gpio);
-    FTS_INFO("irq in ts_data:%d irq in client:%d", ts_data->irq, ts_data->client->irq);
-    if (ts_data->irq != ts_data->client->irq)
-        FTS_ERROR("IRQs are inconsistent, please check <interrupts> & <focaltech,irq-gpio> in DTS");
+    if(irq_mode == 1){
+        ts_data->irq = gpio_to_irq(pdata->irq_gpio);
+        FTS_INFO("irq in ts_data:%d irq in client:%d", ts_data->irq, ts_data->client->irq);
 
-    if (0 == pdata->irq_gpio_flags)
-        pdata->irq_gpio_flags = IRQF_TRIGGER_FALLING;
-    FTS_INFO("irq flag:%x", pdata->irq_gpio_flags);
-    ret = request_threaded_irq(ts_data->irq, NULL, fts_ts_interrupt,
-                               pdata->irq_gpio_flags | IRQF_ONESHOT,
-                               ts_data->client->name, ts_data);
-							   
-	/*ret = devm_request_irq(&ts_data->client->dev, ts_data->irq, fts_ts_interrupt,
-				IRQF_TRIGGER_FALLING|IRQ_TYPE_EDGE_RISING,ts_data->client->name, ts_data);*/
+
+        if (ts_data->irq != ts_data->client->irq)
+            FTS_ERROR("IRQs are inconsistent, please check <interrupts> & <focaltech,irq-gpio> in DTS");
+
+        if (0 == pdata->irq_gpio_flags)
+            pdata->irq_gpio_flags = IRQF_TRIGGER_FALLING;
+        FTS_INFO("irq flag:%x", pdata->irq_gpio_flags);
+        ret = request_threaded_irq(ts_data->irq, NULL, fts_ts_interrupt,
+                pdata->irq_gpio_flags | IRQF_ONESHOT,
+                ts_data->client->name, ts_data);
+        /*ret = devm_request_irq(&ts_data->client->dev, ts_data->irq, fts_ts_interrupt,
+          IRQF_TRIGGER_FALLING|IRQ_TYPE_EDGE_RISING,ts_data->client->name, ts_data);*/
+
+    }else{
+        if (ts_data->ts_workqueue) {
+            INIT_DELAYED_WORK(&ts_data->event_work, event_work_func);
+            queue_delayed_work(ts_data->ts_workqueue, &ts_data->event_work, msecs_to_jiffies(15000));
+        }
+    }
     return ret;
 }
 
@@ -991,17 +1057,14 @@ static int fts_input_init(struct fts_ts_data *ts_data)
     input_set_abs_params(input_dev, ABS_MT_TRACKING_ID, 0, 0x0f, 0, 0);
 #endif
 
-#ifdef CFG_SWAP_XY
-    input_set_abs_params(input_dev, ABS_MT_POSITION_X,
-            0, pdata->y_max, 0, 0);
-    input_set_abs_params(input_dev, ABS_MT_POSITION_Y,
-            0, pdata->x_max, 0, 0);
-#else /* CFG_CTS_SWAP_XY */
+    if ( 1 == xy_swap ) {
+        swap(pdata->x_max,pdata->y_max);
+    }
+
     input_set_abs_params(input_dev, ABS_MT_POSITION_X,
             0, pdata->x_max, 0, 0);
     input_set_abs_params(input_dev, ABS_MT_POSITION_Y,
             0, pdata->y_max, 0, 0);
-#endif /* CFG_CTS_SWAP_XY */
     input_set_abs_params(input_dev, ABS_MT_TOUCH_MAJOR, 0, 0xFF, 0, 0);
 #if FTS_REPORT_PRESSURE_EN
     input_set_abs_params(input_dev, ABS_MT_PRESSURE, 0, 0xFF, 0, 0);
@@ -1117,54 +1180,44 @@ err_irq_gpio_req:
 static int fts_get_dt_coords(struct device *dev, char *name,
                              struct fts_ts_platform_data *pdata)
 {
-    //int ret = 0;
-    //u32 coords[FTS_COORDS_ARR_SIZE] = { 0 };
-    //struct property *prop;
-    //struct device_node *np = dev->of_node;
-    //int coords_size;
+    int ret = 0;
+    u32 coords[FTS_COORDS_ARR_SIZE] = { 0 };
+    struct property *prop;
+    struct device_node *np = dev->of_node;
+    int coords_size;
 
-	pdata->x_min = FTS_X_MIN_DISPLAY_DEFAULT;
-	pdata->y_min = FTS_Y_MIN_DISPLAY_DEFAULT;
-	pdata->x_max = FTS_X_MAX_DISPLAY_DEFAULT;
-	pdata->y_max = FTS_Y_MAX_DISPLAY_DEFAULT;
-	
-	
-	
-    /*prop = of_find_property(np, name, NULL);
+    prop = of_find_property(np, name, NULL);
     if (!prop)
-        return -EINVAL;
+        goto fail;
     if (!prop->value)
-        return -ENODATA;
+        goto fail;
 
     coords_size = prop->length / sizeof(u32);
     if (coords_size != FTS_COORDS_ARR_SIZE) {
         FTS_ERROR("invalid:%s, size:%d", name, coords_size);
-        return -EINVAL;
+        goto fail;
     }
 
     ret = of_property_read_u32_array(np, name, coords, coords_size);
     if (ret && (ret != -EINVAL)) {
         FTS_ERROR("Unable to read %s", name);
-        return -ENODATA;
+        goto fail;
     }
 
-    if (!strcmp(name, "focaltech,display-coords")) {
-        pdata->x_min = coords[0];
-        pdata->y_min = coords[1];
-        pdata->x_max = coords[2];
-        pdata->y_max = coords[3];
-    } else {
-        FTS_ERROR("unsupported property %s", name);
-        pdata->x_min = FTS_X_MIN_DISPLAY_DEFAULT;
-        pdata->y_min = FTS_Y_MIN_DISPLAY_DEFAULT;
-        pdata->x_max = FTS_X_MAX_DISPLAY_DEFAULT;
-        pdata->y_max = FTS_Y_MAX_DISPLAY_DEFAULT;
-       // return -EINVAL;
-    }
-*/
+    pdata->x_min = coords[0];
+    pdata->y_min = coords[1];
+    pdata->x_max = coords[2];
+    pdata->y_max = coords[3];
+
+
     printk("display x(%d %d) y(%d %d)", pdata->x_min, pdata->x_max, pdata->y_min, pdata->y_max);
-    /*FTS_INFO("display x(%d %d) y(%d %d)", pdata->x_min, pdata->x_max,
-             pdata->y_min, pdata->y_max);*/
+    return 0;
+
+fail:
+    pdata->x_min = FTS_X_MIN_DISPLAY_DEFAULT;
+    pdata->y_min = FTS_Y_MIN_DISPLAY_DEFAULT;
+    pdata->x_max = FTS_X_MAX_DISPLAY_DEFAULT;
+    pdata->y_max = FTS_Y_MAX_DISPLAY_DEFAULT;
     return 0;
 }
 
@@ -1238,6 +1291,34 @@ static int fts_parse_dt(struct device *dev, struct fts_ts_platform_data *pdata)
 
     FTS_INFO("max touch number:%d, irq gpio:%d, reset gpio:%d",
              pdata->max_touch_number, pdata->irq_gpio, pdata->reset_gpio);
+
+    ret = of_property_read_u32(np, "xy_swap", &temp_val);
+    if (0 == ret) {
+        xy_swap = temp_val;
+    } else {
+        FTS_ERROR("Unable to get xy_swap");
+    }
+
+    ret = of_property_read_u32(np, "x_reverse", &temp_val);
+    if (0 == ret) {
+        x_reverse = temp_val;
+    } else {
+        FTS_ERROR("Unable to get x_reverse");
+    }
+
+    ret = of_property_read_u32(np, "y_reverse", &temp_val);
+    if (0 == ret) {
+        y_reverse = temp_val;
+    } else {
+        FTS_ERROR("Unable to get y_reverse");
+    }
+
+    ret = of_property_read_u32(np, "irq_mode", &temp_val);
+    if (0 == ret) {
+        irq_mode = temp_val;
+    } else {
+        FTS_ERROR("Unable to get irq_mode");
+    }
 
     FTS_FUNC_EXIT();
     return 0;
@@ -1416,12 +1497,13 @@ static int fts_ts_probe(struct i2c_client *client, const struct i2c_device_id *i
     fts_reset_proc(200);
 #endif
 
+/*
     ret = fts_get_ic_information(ts_data);
     if (ret) {
         FTS_ERROR("not focal IC, unregister driver");
         goto err_irq_req;
     }
-
+*/
 #if FTS_APK_NODE_EN
     ret = fts_create_apk_debug_channel(ts_data);
     if (ret) {
@@ -1643,6 +1725,9 @@ static int fts_ts_suspend(struct device *dev)
 
     fts_irq_disable();
 
+    if(irq_mode == 0)
+        cancel_delayed_work(&ts_data->event_work);
+
 #if FTS_POWER_SOURCE_CUST_EN
     ret = fts_power_source_ctrl(ts_data, DISABLE);
     if (ret < 0) {
@@ -1708,6 +1793,9 @@ static int fts_ts_resume(struct device *dev)
 
     ts_data->suspended = false;
     fts_irq_enable();
+
+    if(irq_mode == 0)
+        queue_delayed_work(ts_data->ts_workqueue, &ts_data->event_work, msecs_to_jiffies(15));
 
     FTS_FUNC_EXIT();
     return 0;
@@ -1778,7 +1866,7 @@ static void __exit fts_ts_exit(void)
     i2c_del_driver(&fts_ts_driver);
 }
 
-module_init(fts_ts_init);
+late_initcall_sync(fts_ts_init);
 module_exit(fts_ts_exit);
 
 MODULE_AUTHOR("FocalTech Driver Team");

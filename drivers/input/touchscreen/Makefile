@@ -127,5 +127,6 @@ obj-$(CONFIG_TOUCHSCREEN_VTL_CT36X)	+= vtl_ts/
 obj-$(CONFIG_TOUCHSCREEN_GT1X)		+= gt1x/
 obj-$(CONFIG_TOUCHSCREEN_HYN_CST2XX)	+= hyn_cst2xx/
 obj-$(CONFIG_TOUCHSCREEN_FTS)	+= focaltech_touch/
+obj-$(CONFIG_TOUCHSCREEN_FTS_RADXA)	+= focaltech_touch_radxa/
 obj-$(CONFIG_TOUCHSCREEN_FT5436)	+= focaltech_touch_ft5436/
 obj-$(CONFIG_TOUCHSCREEN_CYPRESS_CYTTSP5) += cyttsp5/
