@@ -1,6 +1,6 @@
 /dts-v1/;
 
-#include "rk3399-rockpi-4b.dts"
+#include "rk3566-rock-cm3-rpi-cm4-io.dts"
 
 &display_subsystem {
     route {
