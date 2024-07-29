@@ -154,14 +154,16 @@
 	};
 
 	pcie30_3v3: gpio-regulator {
-		compatible = "regulator-gpio";
-		regulator-name = "pcie30_3v3";
-		regulator-min-microvolt = <100000>;
+		compatible = "regulator-fixed";
+		regulator-name = "vcc3v3_pcie";
+		regulator-min-microvolt = <3300000>;
 		regulator-max-microvolt = <3300000>;
-		gpios = <&gpio0 RK_PD4 GPIO_ACTIVE_HIGH>;
-		gpios-states = <0x1>;
-		states = <100000 0x0
-			  3300000 0x1>;
+		enable-active-high;
+		regulator-always-on;
+		regulator-boot-on;
+		gpio = <&gpio0 RK_PD4 GPIO_ACTIVE_HIGH>;
+		startup-delay-us = <5000>;
+		vin-supply = <&vcc5v0_sys>;
 	};
 
 	vcc5v0_usb: vcc5v0-usb {
