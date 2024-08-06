@@ -138,4 +138,7 @@ all.config
 *.kdev4
 
 # config
+configs/
 kernel/configs/*
+prebuilts/
+tests/
