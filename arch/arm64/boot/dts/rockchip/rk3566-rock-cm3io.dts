@@ -9,9 +9,9 @@
 
 #include "rk3566-rock-compute-module-3.dtsi"
 //#include "radxa-cm3-raspberrypi-7inch-touchscreen.dtsi"
-#include "rk3566-rock-cm3io_219.dtsi"
+//#include "rk3566-rock-cm3io_219.dtsi"
 //#include "rk3566-radxa-cm3io-edp.dtsi"
-#include "rk3566-rock-cm3io-10inch-touchscreen.dtsi"
+//#include "rk3566-rock-cm3io-10inch-touchscreen.dtsi"
 // #include "rk3566-rock-cm3io_8inch-touchscreen.dtsi"
 // #include "rk3566-rock-cm3io_jymx1013833281be-display.dtsi"
 
