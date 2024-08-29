@@ -945,7 +945,7 @@ static void event_work_func(struct work_struct *work)
         ret = fts_i2c_read_reg(client, FTS_REG_CHIP_ID, &chip_id[0]);
         FTS_INFO("chip id :0x%02x ", chip_id[0]);
         if (ret < 0){
-              queue_delayed_work(ts_data->ts_workqueue, &ts_data->event_work, msecs_to_jiffies(1000));
+            /*queue_delayed_work(ts_data->ts_workqueue, &ts_data->event_work, msecs_to_jiffies(1000));*/
               return;
         } else {
             ic_ready = 1;

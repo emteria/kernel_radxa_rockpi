@@ -37,7 +37,7 @@
 #include "dwmac-rk-tool.h"
 
 #include <asm/system_info.h>
-static int mac_from_sn = 1;
+static u8 mac_from_sn = 0;
 
 #define MAX_ETH		2
 
@@ -2078,15 +2078,18 @@ void rk_get_eth_addr(void *priv, unsigned char *addr)
 	int ret, id = bsp_priv->bus_id;
 
 
-	if (mac_from_sn == 0) {
+	if (mac_from_sn != 0) {
 		unsigned int serial;
 		serial = system_serial_low | system_serial_high;
-		addr[0] = 0;
-		addr[1] = 0;
-		addr[2] = 0xa4;
-		addr[3] = 0x10 + (serial >> 24);
+		addr[0] = (0xfe & system_serial_low);
+		addr[1] = (0x02 | system_serial_high);
+		addr[2] = serial;
+		addr[3] = serial >> 24;
 		addr[4] = serial >> 16;
+		if(mac_from_sn == '1')
 		addr[5] = serial >> 8;
+		else if(mac_from_sn == '2')
+		addr[5] = system_serial_high >> 8 + 1;
 		printk("eth mac address  = %x:%x:%x:%x:%x:%x\n",addr[0],addr[1],addr[2],addr[3],addr[4],addr[5]);
 		return;
 	}
@@ -2132,7 +2135,7 @@ static int rk_gmac_probe(struct platform_device *pdev)
 	struct stmmac_resources stmmac_res;
 	const struct rk_gmac_ops *data;
 	int ret;
-	u8 value;
+	// u8 value;
 
 	data = of_device_get_match_data(&pdev->dev);
 	if (!data) {
@@ -2151,8 +2154,8 @@ static int rk_gmac_probe(struct platform_device *pdev)
 	if (!of_device_is_compatible(pdev->dev.of_node, "snps,dwmac-4.20a"))
 		plat_dat->has_gmac = true;
 		
-	mac_from_sn = of_property_read_u8(pdev->dev.of_node,"mac_from_sn",&value);
-	if (mac_from_sn < 0) {
+	ret = of_property_read_u8(pdev->dev.of_node,"mac_from_sn",&mac_from_sn);
+	if (ret < 0) {
 		printk("dont use mac_address from cpu_sn,  in :%s.\n", __func__);
 	}
 

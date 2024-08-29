@@ -1,0 +1,118 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright (c) 2021 Rockchip Electronics Co., Ltd.
+ */
+
+#include <dt-bindings/display/rockchip_vop.h>
+
+
+
+/ {
+	compatible = "radxa,rock-3c", "rockchip,rk3566";
+
+	vcc_mipi: vcc-mipi {
+		status = "okay";
+		compatible = "regulator-fixed";
+		regulator-name = "vcc_mipi";
+		regulator-boot-on;
+		regulator-always-on;
+		enable-active-high;
+		gpios = <&gpio0 RK_PC7 GPIO_ACTIVE_HIGH>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&vcc_mipi_en>;
+		vin-supply = <&vcca1v8_pmu>;
+	};
+};
+
+&video_phy1 {
+    status = "okay";
+};
+
+&dsi1 {
+	status = "okay";
+	#address-cells = <1>;
+    #size-cells = <0>;
+
+
+	dsi1_panel: dsi-panel@0 {
+		compatible = "raspits,tc358762";
+		reg = <0x0>;
+		status = "okay";
+
+		ports {
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			port@0 {
+				reg = <0>;
+
+				panel_in_dsi1: endpoint {
+					remote-endpoint = <&dsi1_out_panel>;
+				};
+			};
+		};
+	};
+
+	ports {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		port@1 {
+			reg = <1>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			dsi1_out_panel: endpoint@0 {
+				reg = <0>;
+				remote-endpoint = <&panel_in_dsi1>;
+			};
+		};
+	};
+};
+
+&dsi1_in_vp0 {
+	status = "disabled";
+};
+
+&dsi1_in_vp1 {
+	status = "okay";
+};
+
+// &route_dsi1 {
+// 	status = "okay";
+// 	connect = <&vp0_out_dsi1>;
+// };
+
+&i2c3 {
+	status = "okay";
+	pinctrl-0 = <&i2c3m1_xfer>;
+
+	 focaltech1: focaltech1@30 {
+               status = "okay";
+               compatible = "focaltech,fts";
+               reg = <0x30>;
+             //  focaltech,irq-gpio = <&gpio0 RK_PB3 IRQ_TYPE_EDGE_FALLING>;
+             //  focaltech,reset-gpio = <&gpio0 RK_PB4 GPIO_ACTIVE_LOW>;
+               irq_mode = <0>; //0 poll ,1 irq
+               x_reverse = <1>;
+               y_reverse = <1>;
+               xy_swap = <0>;
+               focaltech,display-coords =  <0 0 800 480>;
+               focaltech,max-touch-number = <10>;
+     };
+
+	rockpi_mcu: rockpi-mcu@45 {
+		compatible = "rockpi_mcu";
+		reg = <0x45>;
+		status = "okay";
+	};
+};
+
+&pinctrl {
+	mipi {
+		vcc_mipi_en: vcc-mipi-en {
+			rockchip,pins = <0 RK_PC7 RK_FUNC_GPIO &pcfg_output_high>;
+		};
+	};
+
+};
