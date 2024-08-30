@@ -128,7 +128,8 @@ DtsIoDomainVoltage()
 			|grep $supply \
 			| awk -F 'regulator-max-microvolt' '{print $2}' \
 			| cut -d "<" -f 2 \
-			| cut -d ">" -f 1)
+			| cut -d ">" -f 1 \
+			| xargs)
 	fi
 }
 

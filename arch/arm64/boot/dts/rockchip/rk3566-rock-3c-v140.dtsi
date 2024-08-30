@@ -14,9 +14,9 @@
 #include <dt-bindings/display/drm_mipi_dsi.h>
 #include <dt-bindings/sensor-dev.h>
 #include "rk3566.dtsi"
-#include "rk3568-radxa-3c-rpi-camera-imx219-1.dtsi"
+// #include "rk3568-radxa-3c-rpi-camera-imx219-1.dtsi"
 // #include "rk3566-radxa-3c-5inch-touchscreen.dtsi"
-#include "rock3c-7inch-touchscreen.dtsi"
+// #include "rock3c-7inch-touchscreen.dtsi"
 
 / {
         model = "Radxa ROCK 3 Model C";
