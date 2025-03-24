@@ -9,6 +9,7 @@
             logo,kernel = "logo_black.bmp";
         };
     };
+};
 
 &gmac1 {
         mac_from_sn = "1";
